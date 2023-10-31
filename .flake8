@@ -1,0 +1,27 @@
+[flake8]
+# Línea máxima de caracteres
+max-line-length = 120
+
+# Excluir directorios o patrones de archivos
+exclude =
+    __pycache__,
+    migrations,
+    venv,
+    .git,
+    .idea,
+    .vscode
+
+# Códigos de error específicos para habilitar o deshabilitar
+ignore = E731, W503, E501, E402, F401, E722, F841, D100, D101, D102, D103, D104, D105, D106, D107
+
+# Habilitar extensiones específicas
+enable-extensions = G, D
+
+# Reglas de ignorar específicas por archivo
+per-file-ignores =
+
+# Nombres de variables permitidos para una sola letra en funciones cortas
+single-letter-variables = i, j, k, x, y, z
+
+# Preferencia de comillas en cadenas
+inline-quotes = "
