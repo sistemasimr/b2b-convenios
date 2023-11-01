@@ -12,6 +12,8 @@ B2B Convenios es una plataforma que permite a las empresas asignar créditos a s
 - Python 3.8.10. Descarga [aquí](https://www.python.org/downloads/release/python-3810/). 
   - **Windows installer (64-bit)**
 
+  - **Realizar una instalación personalizada, para que Python 3.8.10 se instale en la carpeta de preferencia.**
+
   Para crear el entorno virtual, especifica la ruta con la versión de Python específica.
   Ejemplo:
   ```bash
