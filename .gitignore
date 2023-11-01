@@ -163,6 +163,4 @@ cython_debug/
 */migrations/*
 */migrations/*.pyc
 b2b/settings/local.py
-
-
-
+b2b/local_settings.py
