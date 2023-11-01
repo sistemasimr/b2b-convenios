@@ -14,22 +14,34 @@ ALLOWED_HOSTS = ['*']
 
 CORS_ORIGIN_ALLOW_ALL=True
  
-ENV = 'Local'
+ENV = 'Develop'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-if ENV == 'Local':
+if ENV == 'Develop':
     DATABASES = {
-
         'default': {
                 'ENGINE': 'django.db.backends.mysql',
-                'NAME': 'b2b_convenios',
+                'NAME': 'b2b',
                 'USER': 'root',
-                'PASSWORD': 'toor',
-                'HOST': '127.0.0.1',
+                'PASSWORD': 'DBimr2021intranetDB',
+                'HOST': '192.168.1.21',
                 'PORT': '3306',
             },
 
+        "bigjohndb": {
+            'ENGINE': 'mssql',
+            'NAME': 'BIGJOHN',
+            'USER': 'bigjohn',
+            'PASSWORD': '2UMIrtsqCEmkv',
+            'HOST': 'tcp:comerssiamirror.eastus2.cloudapp.azure.com,38693',
+            'PORT': '1433',
+            'OPTIONS': {
+                'driver': 'ODBC Driver 17 for SQL Server',
+                'collation': 'SQL_Latin1_General_CP1_CI_AS',
+                'unicode_results': True,
+            },
+        }
     }
 
 
