@@ -165,3 +165,8 @@ cython_debug/
 b2b/settings/local.py
 b2b/local_settings.py
 local_settings.py
+apps/agreement/migrations
+apps/company/migrations
+apps/customer/migrations
+apps/users/migrations
+
