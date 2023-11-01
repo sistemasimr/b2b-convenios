@@ -162,8 +162,8 @@ cython_debug/
 # Ignorar carpetas de migraciones de Django
 */migrations/*
 */migrations/*.pyc
-# b2b/settings/local.py
-# b2b/local_settings.py
+b2b/settings/local.py
+b2b/local_settings.py
 apps/users/migrations/0001_initial.py
 apps/customers/migrations/0001_initial.py
 apps/company/migrations/0001_initial.py

@@ -14,18 +14,18 @@ ALLOWED_HOSTS = ['*']
 
 CORS_ORIGIN_ALLOW_ALL=True
  
-ENV = 'Develop'
+ENV = 'Local'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-if ENV == 'Develop':
+if ENV == 'Local':
     DATABASES = {
         'default': {
                 'ENGINE': 'django.db.backends.mysql',
-                'NAME': 'b2b',
+                'NAME': 'b2b_convenios',
                 'USER': 'root',
-                'PASSWORD': 'DBimr2021intranetDB',
-                'HOST': '192.168.1.21',
+                'PASSWORD': 'toor',
+                'HOST': '127.0.0.1',
                 'PORT': '3306',
             },
 
