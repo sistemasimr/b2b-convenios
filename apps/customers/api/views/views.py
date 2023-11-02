@@ -91,7 +91,9 @@ class CustomersLoad(APIView):
                     customer.save()
                     create_client_agreement(id_agreement, customer)
 
-                data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': df.to_dict(orient='records')}
+                response = list_users()
+                      
+                data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': response}
                 return Response(data, status=200)
 
             
@@ -119,8 +121,10 @@ class CustomersLoad(APIView):
                     except Customer.DoesNotExist:
                         data = {'message': f'El usuario {document} no existe ', 'data': None}
                         return Response(data, status=400)
-                        
-                data = {'message': 'Usuarios eliminados con éxito', 'data': df.to_dict(orient='records')}
+                    
+                response = list_users()
+                      
+                data = {'message': 'Usuarios eliminados con éxito', 'data': response}
                 return Response(data, status=200)
 
         except Exception as e:

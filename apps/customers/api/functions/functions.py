@@ -1,5 +1,9 @@
 from apps.agreement.models import Agreement
+from rest_framework.response import Response
+
 from django.db import connections
+from ..serializers.serializers import *
+
 
 import re
 
@@ -51,3 +55,14 @@ def validate_user_comerssia():
     except Exception as e:
         print(f"Error en la consulta: {str(e)}")
         return False
+    
+
+def list_users():
+    customers = Customer.objects.all()
+    serializer = CustomerSerializer(customers, many=True)
+    return serializer.data
+
+    
+
+
+
