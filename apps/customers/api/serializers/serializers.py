@@ -6,7 +6,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ('first_name','last_name','is_active', 'document_type_display', 'agreements')
+        fields = ('first_name','last_name','is_active', 'document_type_display')
 
-    agreements = serializers.StringRelatedField(many=True)
         
+ 
