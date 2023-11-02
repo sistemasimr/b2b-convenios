@@ -1,5 +1,5 @@
 from apps.agreement.models import Agreement
-from django.db import connections, connection
+from django.db import connections
 
 import re
 

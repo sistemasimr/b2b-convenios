@@ -170,3 +170,5 @@ apps/company/migrations
 apps/customer/migrations
 apps/users/migrations
 
+b2b/local_settings.py
+apps/customers/migrations

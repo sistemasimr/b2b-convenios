@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pandas as pd
 
 from rest_framework.views import APIView
@@ -7,7 +5,6 @@ from rest_framework.response import Response
 
 from ...models import * 
 from ..functions.functions import *
-from ....users.api.functions.functions import is_valid_email
 
 
 class CustomersLoad(APIView):
@@ -16,7 +13,8 @@ class CustomersLoad(APIView):
         if 'clientes' not in request.FILES:
             data = {'message': 'No se ha proporcionado un archivo Excel', 'data': None}
             return Response(data, status=400)
-
+    
+        
         archive = request.FILES['clientes']
         allowed_extensions = ['.xlsx', '.xls']
     
@@ -25,7 +23,6 @@ class CustomersLoad(APIView):
             return Response(data, status=400)
 
         try:
-
             if type == 'create':
                 document_type_mapping = {
                     'cc': 1,
@@ -35,21 +32,28 @@ class CustomersLoad(APIView):
 
                 df = pd.read_excel(archive)
 
-                if df.empty:
-                    data = {'message': 'El archivo Excel está vacío', 'data': None}
-                    return Response(data, status=400)
-                
-                required_columns = ['nombres', 'apellidos', 'tipo_documento', 'documento', 'genero', 'celular', 'email', 'cod_convenio']
-                
-                if not all(col in df.columns for col in required_columns):
+                required_columns = ['nombres', 'apellidos', 'tipo_documento', 'documento', 'genero', 'celular']
 
+                if not all(col in df.columns for col in required_columns):
                     missing_columns = [col for col in required_columns if col not in df.columns]
                     data = {'message': f'Faltan los siguientes encabezados en el archivo Excel: {", ".join(missing_columns)}', 'data': None}
                     return Response(data, status=400)
 
+                if df.empty:
+                    data = {'message': f'El archivo {archive} está vacío', 'data': None}
+                    return Response(data, status=400)
+
+                id_agreement = 1
+
                 for index, row in df.iterrows():
-                    document_type_excel = row['tipo_documento'].lower() 
-                    id_agreement = row['cod_convenio']
+                    document_type_excel = row['tipo_documento']
+
+                    if isinstance(document_type_excel, str):
+                        document_type_excel = document_type_excel.lower()
+                    else:
+                        data = {'message': 'Recuerda que los tipos de documento válidos son: cc, ti, ce', 'data': None}
+                        return Response(data, status=400)
+
                     document_number = row['documento']
 
                     if document_type_excel in document_type_mapping:
@@ -58,28 +62,23 @@ class CustomersLoad(APIView):
                     if Customer.objects.filter(document=document_number).exists():
                         data = {'message': f'El documento {document_number} ya existe en la base de datos', 'data': None}
                         return Response(data, status=409)
-                    
+
                     if not Agreement.objects.filter(id=id_agreement).exists():
                         data = {'message': f"El convenio con id: {id_agreement} no existe en la base de datos", 'data': None}
                         return Response(data, status=404)
-                    
-                    if not validate_customer_names_last_names(row['nombres'],row['apellidos']):
+
+                    if not validate_customer_names_last_names(row['nombres'], row['apellidos']):
                         data = {'message': 'Los nombres y apellidos deben contener solo letras', 'data': None}
-                        return Response(data,status=400)
-                    
+                        return Response(data, status=400)
+
                     if not validate_customer_document_type(row['tipo_documento']):
                         data = {'message': 'El tipo de documento debe contener solo letras', 'data': None}
-                        return Response(data,status=400)
-                    
+                        return Response(data, status=400)
+
                     if not validate_customer_gender(row['genero']):
                         data = {'message': 'El género debe contener solo letras', 'data': None}
-                        return Response(data,status=400)
-                    
-                    if not is_valid_email(row['email']):
-                        data = {'message': 'No es un email válido', 'data': None}
-                        return Response(data,status=400)
+                        return Response(data, status=400)
 
-                    
                     customer = Customer(
                         first_name=row['nombres'],
                         last_name=row['apellidos'],
@@ -87,24 +86,43 @@ class CustomersLoad(APIView):
                         document=document_number,
                         gender=row['genero'],
                         cellphone=row['celular'],
-                        email=row['email']
-                                    
                     )
 
                     customer.save()
                     create_client_agreement(id_agreement, customer)
 
-                    if validate_user_comerssia():#falta las validaciones de convenios
-                        print("La validación del usuario fue exitosa.")
-                    else:
-                        print("La validación del usuario falló.")
-
                 data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': df.to_dict(orient='records')}
                 return Response(data, status=200)
+
+            
+            elif type == 'delete':
+
+                df = pd.read_excel(archive)
+                required_columns = ['documento']
+                
+                if not all(col in df.columns for col in required_columns):
+                    missing_columns = [col for col in required_columns if col not in df.columns]
+                    data = {'message': f'Faltan el siguiente encabezado en el archivo Excel: {", ".join(missing_columns)}', 'data': None}
+                    return Response(data, status=400)
+                
+                if df.empty:
+                    data = {'message': f'El archivo {archive} está vacío', 'data': None}
+                    return Response(data, status=400)
+                
+                for index, row in df.iterrows():
+                    document = row['documento']
+
+                    try:
+                        customer = Customer.objects.get(document=document)
+                        customer.is_active = False 
+                        customer.save()
+                    except Customer.DoesNotExist:
+                        data = {'message': f'El usuario {document} no existe ', 'data': None}
+                        return Response(data, status=200)
+                        
+                data = {'message': 'Usuarios eliminados con éxito', 'data': df.to_dict(orient='records')}
+                return Response(data, status=200)
+
         except Exception as e:
             data = {'message': 'Error al procesar el archivo Excel', 'data': str(e)}
             return Response(data, status=500)
-
-    
-      
- 
