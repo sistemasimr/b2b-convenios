@@ -130,3 +130,19 @@ class CustomersLoad(APIView):
         except Exception as e:
             data = {'message': 'Error al procesar el archivo Excel', 'data': str(e)}
             return Response(data, status=500)
+        
+class ListCustomers(APIView):
+    def get(self, request):
+        try:
+
+            response = list_users()
+                      
+            data = {'message': 'Listado de clientes', 'data': response}
+            return Response(data, status=200)
+        
+        except Exception as e:
+            data = {'message': 'Error al listar clientes', 'data': str(e)}
+            return Response(data, status=500)
+
+
+
