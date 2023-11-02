@@ -1,10 +1,10 @@
 from apps.agreement.models import Agreement
-from rest_framework.response import Response
 
-from django.db import connections
 from ..serializers.serializers import *
+from datetime import datetime
+from django.db import connections
 
-
+import os
 import re
 
 def create_client_agreement(id_agreement, customer):
@@ -43,12 +43,26 @@ def validate_customer_gender(gender):
         return False
     
 
-def validate_user_comerssia():
+def flat_file_comerssia():
     try:
-        cursor_comerssia = connections['bigjohndb'].cursor()
-        query = 'SELECT CLICodigo FROM [BIGJOHN_BA].dbo.VW_CLIENTES'
-        cursor_comerssia.execute(query)
-        results = cursor_comerssia.fetchall()
+        fecha = datetime.now().strftime("%Y%m%d")
+        folder_name = 'C:\\cargas'
+        file_name = f'B2B{fecha}.txt'
+
+        if not os.path.exists(folder_name):
+            os.mkdir(folder_name)
+            print(f"La carpeta '{folder_name}' ha sido creada.")
+
+        cursor_b2b = connections['default'].cursor()
+        query = 'SELECT * FROM vw_customers_customers_agreements'
+        cursor_b2b.execute(query)
+        results = cursor_b2b.fetchall()
+        print(results)
+        
+        # cursor_comerssia = connections['bigjohndb'].cursor()
+        # query = 'SELECT CLICodigo FROM [BIGJOHN_BA].dbo.VW_CLIENTES'
+        # cursor_comerssia.execute(query)
+        # results = cursor_comerssia.fetchall()
 
         
         return True 

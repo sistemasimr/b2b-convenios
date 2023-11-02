@@ -59,9 +59,9 @@ class CustomersLoad(APIView):
                     if document_type_excel in document_type_mapping:
                         document_type_model = document_type_mapping[document_type_excel]
 
-                    if Customer.objects.filter(document=document_number).exists():
-                        data = {'message': f'El documento {document_number} ya existe en la base de datos', 'data': None}
-                        return Response(data, status=409)
+                    # if Customer.objects.filter(document=document_number).exists():
+                    #     data = {'message': f'El documento {document_number} ya existe en la base de datos', 'data': None}
+                    #     return Response(data, status=409)
 
                     if not Agreement.objects.filter(id=id_agreement).exists():
                         data = {'message': f"El convenio con id: {id_agreement} no existe en la base de datos", 'data': None}
@@ -79,19 +79,20 @@ class CustomersLoad(APIView):
                         data = {'message': 'El género debe contener solo letras', 'data': None}
                         return Response(data, status=400)
 
-                    customer = Customer(
-                        first_name=row['nombres'],
-                        last_name=row['apellidos'],
-                        document_type=document_type_model,
-                        document=document_number,
-                        gender=row['genero'],
-                        cellphone=row['celular'],
-                    )
+                    # customer = Customer(
+                    #     first_name=row['nombres'],
+                    #     last_name=row['apellidos'],
+                    #     document_type=document_type_model,
+                    #     document=document_number,
+                    #     gender=row['genero'],
+                    #     cellphone=row['celular'],
+                    # )
 
-                    customer.save()
-                    create_client_agreement(id_agreement, customer)
+                    # customer.save()
+                    # create_client_agreement(id_agreement, customer)
 
                 response = list_users()
+                flat_file_comerssia()
                       
                 data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': response}
                 return Response(data, status=200)
