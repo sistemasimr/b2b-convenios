@@ -118,7 +118,7 @@ class CustomersLoad(APIView):
                         customer.save()
                     except Customer.DoesNotExist:
                         data = {'message': f'El usuario {document} no existe ', 'data': None}
-                        return Response(data, status=200)
+                        return Response(data, status=400)
                         
                 data = {'message': 'Usuarios eliminados con éxito', 'data': df.to_dict(orient='records')}
                 return Response(data, status=200)
