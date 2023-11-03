@@ -63,9 +63,17 @@ class CustomersLoad(APIView):
                         return Response(data, status=400)
 
                     document_number = row['documento']
+                    gender = row['genero'].upper()
+
+                    if gender not in ('M', 'F'):
+                        data = {'message': f'Valor de género no válido: {gender}, recuerda que los permitidos son (M o F)', 'data': None}
+                        return Response(data, status=400)
 
                     if document_type_excel in document_type_mapping:
                         document_type_model = document_type_mapping[document_type_excel]
+                    else:
+                        data = {'message': f'Tipo de documento: {document_type_excel} no válido, recuerda que los permitidos son (cc,ti o ce)', 'data': None}
+                        return Response(data, status=400) 
                         
                     if Customer.objects.filter(document=document_number,is_active=True).exists():
                         data = {'message': f'El documento {document_number} ya existe en la base de datos', 'data': None}
@@ -87,15 +95,17 @@ class CustomersLoad(APIView):
                         data = {'message': 'El género debe contener solo letras', 'data': None}
                         return Response(data, status=400)
                     
-                    existing_customer = Customer.objects.filter(document=document_number, is_active=False).first()
-
+                    if not validate_customer_cellphone(row['celular']):
+                        data = {'message': 'El número de celular debe contener solo números', 'data': None}
+                        return Response(data, status=400)
+                    
                     
                     customer = Customer(
                         first_name=row['nombres'],
                         last_name=row['apellidos'],
                         document_type=document_type_model,
                         document=document_number,
-                        gender=row['genero'],
+                        gender=gender,
                         cellphone=row['celular'],
                     )
 

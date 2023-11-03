@@ -58,11 +58,19 @@ def validate_customer_gender(gender):
     else:
         return False
     
+def validate_customer_cellphone(cellphone):
+    validate_cellphone = r"^[0-9]+$"
+    
+    if re.match(validate_cellphone, cellphone):
+        return True
+    else:
+        return False
+    
 
 def disable_customer(df):
     
     does_not_exist = []
-    
+
     for index, row in df.iterrows():
         document = row['documento']
 
