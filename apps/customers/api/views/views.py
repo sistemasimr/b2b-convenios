@@ -1,4 +1,6 @@
 import pandas as pd
+from django.db import IntegrityError
+
 # import openpyxl
 # import random
 
@@ -40,17 +42,18 @@ class CustomersLoad(APIView):
                     data = {'message': f'Faltan los siguientes encabezados en el archivo Excel: {", ".join(missing_columns)}', 'data': None}
                     return Response(data, status=400)
                 
-                if df.isnull().values.any():
-                    is_empty = df.isnull()
-
-                    empty_fields = is_empty.any()
-                    empty_columns = empty_fields[empty_fields].index.tolist()
-                    empty_columns = [col for col in empty_columns if 'Unnamed' not in col]
-
-                    data = {'message': f'El archivo Excel contiene campos vacíos{empty_columns}', 'data': None}
+                if df.empty:
+                    data = {'message': 'El archivo Excel está vacío.', 'data': None}
                     return Response(data, status=400)
+                
+                validate_create = validate_empty_columns_create_customers(df)
+
+                if validate_create:
+                    data = {'message': 'No pueden ir columnas vacías'}
+                    return Response(data, status=500)
 
                 id_agreement = 1
+                customers_to_create = []
 
                 for index, row in df.iterrows():
                     document_type_excel = row['tipo_documento']
@@ -95,15 +98,24 @@ class CustomersLoad(APIView):
                         cellphone=row['celular'],
                     )
 
-                    customer.save()
-                    create_client_agreement(id_agreement, customer)
+                    customers_to_create.append(customer) 
 
-                    list_customer= list_users()
-                    archive_comerssia = file_comerssia()
+                try:
+                    Customer.objects.bulk_create(customers_to_create)
+                    created_customers = Customer.objects.filter(id__in=[c.id for c in customers_to_create])
 
-                    if not isinstance(archive_comerssia,bool) and archive_comerssia:
-                        data = {'message': 'Ha ocurrido un error al guardar la informacion en comerssia'}
-                        return Response(data, status=500)
+                    agreement_instance = Agreement.objects.get(id=id_agreement)
+
+                    agreement_instance.customers.add(*created_customers)
+                except IntegrityError:
+                    pass
+
+                list_customer= list_users()
+                archive_comerssia = file_comerssia()
+
+                if not isinstance(archive_comerssia,bool) and archive_comerssia:
+                    data = {'message': 'Ha ocurrido un error al guardar la informacion en comerssia'}
+                    return Response(data, status=500)
                       
                 data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': list_customer}
                 return Response(data, status=200)
@@ -119,16 +131,12 @@ class CustomersLoad(APIView):
                     data = {'message': f'Faltan el siguiente encabezado en el archivo Excel: {", ".join(missing_columns)}', 'data': None}
                     return Response(data, status=400)
                 
-                      
-                if df.isnull().values.any():
-                    is_empty = df.isnull()
+                     
+                validate_create = validate_empty_columns_delete_customers(df)
 
-                    empty_fields = is_empty.any()
-                    empty_columns = empty_fields[empty_fields].index.tolist()
-                    empty_columns = [col for col in empty_columns if 'Unnamed' not in col]
-
-                    data = {'message': f'El archivo Excel contiene campos vacíos{empty_columns}', 'data': None}
-                    return Response(data, status=400)
+                if validate_create:
+                    data = {'message': 'No pueden ir columnas vacías'}
+                    return Response(data, status=500)
                 
                 for index, row in df.iterrows():
                     document = row['documento']

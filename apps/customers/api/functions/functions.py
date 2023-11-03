@@ -13,15 +13,24 @@ import re
 import sys
 import traceback
 
+def validate_empty_columns_create_customers(df):
+    empty_columns = ['nombres', 'apellidos', 'tipo_documento', 'documento', 'genero', 'celular']
+    empty_rows = df[df[empty_columns].isnull().any(axis=1)]
 
-def create_client_agreement(id_agreement, customer):
-    try:
-        agreement_instance = Agreement.objects.get(id=id_agreement)
-        customer.agreements.add(agreement_instance)
-        return True 
-    except Agreement.DoesNotExist:
-        return False
-    
+    if not empty_rows.empty:
+        return True
+
+    return False
+
+def validate_empty_columns_delete_customers(df):
+    empty_columns = ['documento']
+    empty_rows = df[df[empty_columns].isnull().any(axis=1)]
+
+    if not empty_rows.empty:
+        return True
+
+    return False
+
 
 def validate_customer_names_last_names(first_name,last_name):
     validate_names_last_names = r"^[A-Za-z ]+$"
