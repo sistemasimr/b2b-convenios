@@ -1,5 +1,6 @@
 import pandas as pd
-
+import random
+import openpyxl
 from django.db import IntegrityError
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -65,7 +66,7 @@ class CustomersLoad(APIView):
 
                     if document_type_excel in document_type_mapping:
                         document_type_model = document_type_mapping[document_type_excel]
-
+                        
                     if Customer.objects.filter(document=document_number,is_active=True).exists():
                         data = {'message': f'El documento {document_number} ya existe en la base de datos', 'data': None}
                         return Response(data, status=409)
@@ -85,6 +86,9 @@ class CustomersLoad(APIView):
                     if not validate_customer_gender(row['genero']):
                         data = {'message': 'El género debe contener solo letras', 'data': None}
                         return Response(data, status=400)
+                    
+                    existing_customer = Customer.objects.filter(document=document_number, is_active=False).first()
+
                     
                     customer = Customer(
                         first_name=row['nombres'],
@@ -123,10 +127,16 @@ class CustomersLoad(APIView):
                 df = pd.read_excel(archive)
                 required_columns = ['documento']
                 
-                if not all(col in df.columns for col in required_columns):
-                    missing_columns = [col for col in required_columns if col not in df.columns]
-                    data = {'message': f'Faltan el siguiente encabezado en el archivo Excel: {", ".join(missing_columns)}', 'data': None}
+                if not all(col in df.columns for col in required_columns) or len(df.columns) > 1:
+                    if len(df.columns) > 1:
+                        message = 'El archivo Excel tiene más de un encabezado. Debe tener solo un encabezado llamado "documento".'
+                    else:
+                        missing_columns = [col for col in required_columns if col not in df.columns]
+                        message = f'Falta el encabezado en el archivo Excel: {", ".join(missing_columns)}'
+
+                    data = {'message': message, 'data': None}
                     return Response(data, status=400)
+
                 
                 if df.empty:
                     data = {'message': 'El archivo Excel está vacío.', 'data': None}
