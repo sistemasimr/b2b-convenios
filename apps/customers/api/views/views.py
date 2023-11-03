@@ -126,9 +126,9 @@ class CustomersLoad(APIView):
                         data = {'message': f'El usuario {document} no existe ', 'data': None}
                         return Response(data, status=400)
                     
-                response = list_users()
+                list_customer = list_users()
                       
-                data = {'message': 'Usuarios eliminados con éxito', 'data': response}
+                data = {'message': 'Usuarios eliminados con éxito', 'data': list_customer}
                 return Response(data, status=200)
 
         except Exception as e:
@@ -138,10 +138,8 @@ class CustomersLoad(APIView):
 class ListCustomers(APIView):
     def get(self, request):
         try:
-
-            response = list_users()
-                      
-            data = {'message': 'Listado de clientes', 'data': response}
+            list_customer = list_users()  
+            data = {'message': 'Listado de clientes', 'data': list_customer}
             return Response(data, status=200)
         
         except Exception as e:

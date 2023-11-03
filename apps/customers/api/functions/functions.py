@@ -63,9 +63,7 @@ def file_comerssia():
         with open(os.path.join(folder_name, file_name), 'w') as file:
             for row in results:
                 document, quota = row
-
                 quota = int(quota)
-
                 line = f'{document}|{quota}|{quota}|0\n'
                 file.write(line)
 
@@ -76,7 +74,7 @@ def file_comerssia():
     
 
 def list_users():
-    customers = Customer.objects.all()
+    customers = Customer.objects.all().order_by('-is_active')
     serializer = CustomerSerializer(customers, many=True)
     return serializer.data
 
