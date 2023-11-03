@@ -59,9 +59,11 @@ def validate_customer_gender(gender):
         return False
     
 def validate_customer_cellphone(cellphone):
+    cellphone_str = str(cellphone)
+
     validate_cellphone = r"^[0-9]+$"
     
-    if re.match(validate_cellphone, cellphone):
+    if re.match(validate_cellphone, cellphone_str):
         return True
     else:
         return False

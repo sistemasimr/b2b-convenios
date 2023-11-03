@@ -65,7 +65,7 @@ class CustomersLoad(APIView):
                     document_number = row['documento']
                     gender = row['genero'].upper()
 
-                    if gender not in ('M', 'F'):
+                    if gender not in ('M', 'F','O'):
                         data = {'message': f'Valor de género no válido: {gender}, recuerda que los permitidos son (M o F)', 'data': None}
                         return Response(data, status=400)
 
@@ -98,7 +98,6 @@ class CustomersLoad(APIView):
                     if not validate_customer_cellphone(row['celular']):
                         data = {'message': 'El número de celular debe contener solo números', 'data': None}
                         return Response(data, status=400)
-                    
                     
                     customer = Customer(
                         first_name=row['nombres'],
