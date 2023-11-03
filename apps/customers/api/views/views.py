@@ -1,9 +1,6 @@
 import pandas as pd
+
 from django.db import IntegrityError
-
-# import openpyxl
-# import random
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -69,7 +66,7 @@ class CustomersLoad(APIView):
                     if document_type_excel in document_type_mapping:
                         document_type_model = document_type_mapping[document_type_excel]
 
-                    if Customer.objects.filter(document=document_number).exists():
+                    if Customer.objects.filter(document=document_number,is_active=True).exists():
                         data = {'message': f'El documento {document_number} ya existe en la base de datos', 'data': None}
                         return Response(data, status=409)
 
@@ -88,7 +85,7 @@ class CustomersLoad(APIView):
                     if not validate_customer_gender(row['genero']):
                         data = {'message': 'El género debe contener solo letras', 'data': None}
                         return Response(data, status=400)
-
+                    
                     customer = Customer(
                         first_name=row['nombres'],
                         last_name=row['apellidos'],
@@ -131,25 +128,28 @@ class CustomersLoad(APIView):
                     data = {'message': f'Faltan el siguiente encabezado en el archivo Excel: {", ".join(missing_columns)}', 'data': None}
                     return Response(data, status=400)
                 
-                     
+                if df.empty:
+                    data = {'message': 'El archivo Excel está vacío.', 'data': None}
+                    return Response(data, status=400)
+                
                 validate_create = validate_empty_columns_delete_customers(df)
 
                 if validate_create:
                     data = {'message': 'No pueden ir columnas vacías'}
                     return Response(data, status=500)
                 
-                for index, row in df.iterrows():
-                    document = row['documento']
+                validate_disable_customer = disable_customer(df)
 
-                    try:
-                        customer = Customer.objects.get(document=document)
-                        customer.is_active = False 
-                        customer.save()
-                    except Customer.DoesNotExist:
-                        data = {'message': f'El usuario {document} no existe ', 'data': None}
-                        return Response(data, status=400)
-                    
+                if validate_disable_customer:
+                    data = {'message': ', '.join(validate_disable_customer)}
+                    return Response(data, status=500)
+    
                 list_customer = list_users()
+                archive_comerssia = file_comerssia()
+
+                if not isinstance(archive_comerssia,bool) and archive_comerssia:
+                    data = {'message': 'Ha ocurrido un error al guardar la informacion en comerssia'}
+                    return Response(data, status=500)
                       
                 data = {'message': 'Usuarios eliminados con éxito', 'data': list_customer}
                 return Response(data, status=200)
@@ -168,54 +168,6 @@ class ListCustomers(APIView):
         except Exception as e:
             data = {'message': 'Error al listar clientes', 'data': str(e)}
             return Response(data, status=500)
-        
-# class ListCustomers(APIView):
-#     def get(self, request):
-
-#             # Definir listas de valores posibles para cada columna
-#             nombres = ["Ange", "Elena", "Luis", "Maria", "Pedro"]
-#             apellidos = ["Gomez", "Lopez", "Rodriguez", "Martinez", "Santos"]
-#             tipos_documento = ["CC", "CE", "TI"]
-#             generos = ["M", "F"]
-#             celulares = ["12345", "67890", "55555", "99999"]
-
-#             # Función para generar un número de documento único
-#             def generar_documento_unico(documentos_existentes):
-#                 while True:
-#                     documento = str(random.randint(100000, 999999))
-#                     if documento not in documentos_existentes:
-#                         documentos_existentes.add(documento)
-#                         return documento
-
-#             # Crear un nuevo archivo de Excel
-#             archivo_excel = openpyxl.Workbook()
-#             hoja = archivo_excel.active
-
-#             # Definir los encabezados de las columnas
-#             hoja.append(["Nombres", "Apellidos", "Tipo de Documento", "Documento", "Género", "Celular"])
-
-#             # Llevar un registro de los documentos generados
-#             documentos_existentes = set()
-
-#             # Generar datos aleatorios y escribirlos en el archivo Excel
-#             for _ in range(5000):  # Cambia el número 10 a la cantidad deseada de filas de datos
-#                 nombre = random.choice(nombres)
-#                 apellido = random.choice(apellidos)
-#                 tipo_documento = random.choice(tipos_documento)
-#                 documento = generar_documento_unico(documentos_existentes)
-#                 genero = random.choice(generos)
-#                 celular = random.choice(celulares)
-
-#                 hoja.append([nombre, apellido, tipo_documento, documento, genero, celular])
-
-#             # Guardar el archivo Excel
-#             archivo_excel.save("datos.xlsx")
-
-#             print("Datos generados y guardados en datos.xlsx")
-                   
-#             data = {'message': 'Usuarios eliminados con éxito', 'data': ''}
-#             return Response(data, status=200)
-
 
 
 

@@ -59,6 +59,21 @@ def validate_customer_gender(gender):
         return False
     
 
+def disable_customer(df):
+    
+    does_not_exist = []
+    
+    for index, row in df.iterrows():
+        document = row['documento']
+
+        try:
+            customer = Customer.objects.get(document=document)
+            customer.is_active = False 
+            customer.save()
+        except Customer.DoesNotExist:
+            does_not_exist.append(f'El usuario {document} no existe')  
+        return does_not_exist  
+
 def file_comerssia():
     try:
         fecha = datetime.now().strftime("%Y%m%d")
