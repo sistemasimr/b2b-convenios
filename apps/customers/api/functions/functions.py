@@ -1,11 +1,14 @@
-from apps.agreement.models import Agreement
 
-from ..serializers.serializers import *
 from datetime import datetime
 from django.db import connections
+from rest_framework.response import Response
+
+from apps.agreement.models import Agreement
+from ..serializers.serializers import *
 
 import os
 import re
+
 
 def create_client_agreement(id_agreement, customer):
     try:
@@ -43,7 +46,7 @@ def validate_customer_gender(gender):
         return False
     
 
-def flat_file_comerssia():
+def file_comerssia():
     try:
         fecha = datetime.now().strftime("%Y%m%d")
         folder_name = 'C:\\cargas'
@@ -51,24 +54,25 @@ def flat_file_comerssia():
 
         if not os.path.exists(folder_name):
             os.mkdir(folder_name)
-            print(f"La carpeta '{folder_name}' ha sido creada.")
 
         cursor_b2b = connections['default'].cursor()
         query = 'SELECT * FROM vw_customers_customers_agreements'
         cursor_b2b.execute(query)
         results = cursor_b2b.fetchall()
-        print(results)
-        
-        # cursor_comerssia = connections['bigjohndb'].cursor()
-        # query = 'SELECT CLICodigo FROM [BIGJOHN_BA].dbo.VW_CLIENTES'
-        # cursor_comerssia.execute(query)
-        # results = cursor_comerssia.fetchall()
 
-        
+        with open(os.path.join(folder_name, file_name), 'w') as file:
+            for row in results:
+                document, quota = row
+
+                quota = int(quota)
+
+                line = f'{document}|{quota}|{quota}|0\n'
+                file.write(line)
+
         return True 
     except Exception as e:
-        print(f"Error en la consulta: {str(e)}")
-        return False
+        error_message = f'Error al generar y guardar el archivo TXT: {str(e)}'
+        return {'message': error_message}
     
 
 def list_users():
