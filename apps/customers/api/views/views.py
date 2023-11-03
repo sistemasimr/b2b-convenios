@@ -37,9 +37,9 @@ class CustomersLoad(APIView):
                     missing_columns = [col for col in required_columns if col not in df.columns]
                     data = {'message': f'Faltan los siguientes encabezados en el archivo Excel: {", ".join(missing_columns)}', 'data': None}
                     return Response(data, status=400)
-
-                if df.empty:
-                    data = {'message': f'El archivo {archive} está vacío', 'data': None}
+                
+                if df.isnull().values.any():
+                    data = {'message': 'El archivo Excel contiene campos vacíos', 'data': None}
                     return Response(data, status=400)
 
                 id_agreement = 1
@@ -111,8 +111,8 @@ class CustomersLoad(APIView):
                     data = {'message': f'Faltan el siguiente encabezado en el archivo Excel: {", ".join(missing_columns)}', 'data': None}
                     return Response(data, status=400)
                 
-                if df.empty:
-                    data = {'message': f'El archivo {archive} está vacío', 'data': None}
+                if df.isnull().values.any():
+                    data = {'message': 'El archivo Excel contiene campos vacíos', 'data': None}
                     return Response(data, status=400)
                 
                 for index, row in df.iterrows():
