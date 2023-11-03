@@ -1,4 +1,6 @@
 import pandas as pd
+# import openpyxl
+# import random
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -39,7 +41,13 @@ class CustomersLoad(APIView):
                     return Response(data, status=400)
                 
                 if df.isnull().values.any():
-                    data = {'message': 'El archivo Excel contiene campos vacíos', 'data': None}
+                    is_empty = df.isnull()
+
+                    empty_fields = is_empty.any()
+                    empty_columns = empty_fields[empty_fields].index.tolist()
+                    empty_columns = [col for col in empty_columns if 'Unnamed' not in col]
+
+                    data = {'message': f'El archivo Excel contiene campos vacíos{empty_columns}', 'data': None}
                     return Response(data, status=400)
 
                 id_agreement = 1
@@ -111,8 +119,15 @@ class CustomersLoad(APIView):
                     data = {'message': f'Faltan el siguiente encabezado en el archivo Excel: {", ".join(missing_columns)}', 'data': None}
                     return Response(data, status=400)
                 
+                      
                 if df.isnull().values.any():
-                    data = {'message': 'El archivo Excel contiene campos vacíos', 'data': None}
+                    is_empty = df.isnull()
+
+                    empty_fields = is_empty.any()
+                    empty_columns = empty_fields[empty_fields].index.tolist()
+                    empty_columns = [col for col in empty_columns if 'Unnamed' not in col]
+
+                    data = {'message': f'El archivo Excel contiene campos vacíos{empty_columns}', 'data': None}
                     return Response(data, status=400)
                 
                 for index, row in df.iterrows():
@@ -145,6 +160,54 @@ class ListCustomers(APIView):
         except Exception as e:
             data = {'message': 'Error al listar clientes', 'data': str(e)}
             return Response(data, status=500)
+        
+# class ListCustomers(APIView):
+#     def get(self, request):
+
+#             # Definir listas de valores posibles para cada columna
+#             nombres = ["Ange", "Elena", "Luis", "Maria", "Pedro"]
+#             apellidos = ["Gomez", "Lopez", "Rodriguez", "Martinez", "Santos"]
+#             tipos_documento = ["CC", "CE", "TI"]
+#             generos = ["M", "F"]
+#             celulares = ["12345", "67890", "55555", "99999"]
+
+#             # Función para generar un número de documento único
+#             def generar_documento_unico(documentos_existentes):
+#                 while True:
+#                     documento = str(random.randint(100000, 999999))
+#                     if documento not in documentos_existentes:
+#                         documentos_existentes.add(documento)
+#                         return documento
+
+#             # Crear un nuevo archivo de Excel
+#             archivo_excel = openpyxl.Workbook()
+#             hoja = archivo_excel.active
+
+#             # Definir los encabezados de las columnas
+#             hoja.append(["Nombres", "Apellidos", "Tipo de Documento", "Documento", "Género", "Celular"])
+
+#             # Llevar un registro de los documentos generados
+#             documentos_existentes = set()
+
+#             # Generar datos aleatorios y escribirlos en el archivo Excel
+#             for _ in range(5000):  # Cambia el número 10 a la cantidad deseada de filas de datos
+#                 nombre = random.choice(nombres)
+#                 apellido = random.choice(apellidos)
+#                 tipo_documento = random.choice(tipos_documento)
+#                 documento = generar_documento_unico(documentos_existentes)
+#                 genero = random.choice(generos)
+#                 celular = random.choice(celulares)
+
+#                 hoja.append([nombre, apellido, tipo_documento, documento, genero, celular])
+
+#             # Guardar el archivo Excel
+#             archivo_excel.save("datos.xlsx")
+
+#             print("Datos generados y guardados en datos.xlsx")
+                   
+#             data = {'message': 'Usuarios eliminados con éxito', 'data': ''}
+#             return Response(data, status=200)
+
 
 
 
