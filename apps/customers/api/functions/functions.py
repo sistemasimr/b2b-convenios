@@ -88,7 +88,7 @@ def disable_customer(df):
             customer.save()
         except Customer.DoesNotExist:
             does_not_exist.append(f'El usuario {document} no existe')  
-        return does_not_exist  
+    return does_not_exist  
 
 def file_comerssia():
     try:
