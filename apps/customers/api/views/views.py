@@ -74,7 +74,7 @@ class CustomersLoad(APIView):
                     else:
                         data = {'message': f'Tipo de documento: {document_type_excel} no válido, recuerda que los permitidos son (cc,ti o ce)', 'data': None}
                         return Response(data, status=400) 
-                        
+                    
                     if Customer.objects.filter(document=document_number,is_active=True).exists():
                         data = {'message': f'El documento {document_number} ya existe en la base de datos', 'data': None}
                         return Response(data, status=409)
@@ -103,24 +103,23 @@ class CustomersLoad(APIView):
                         data = {'message': 'El número de celular es demasiado largo. Solo se permite 10 digitos', 'data': None}
                         return Response(data, status=400)
                     
-                    if Customer.objects.filter(document=document_number).exists():
-                        customer = Customer.objects.get(document=document_number)
-                    else:
-                        customer = Customer(
-                            first_name=row['nombres'],
-                            last_name=row['apellidos'],
-                            document_type=document_type_model,
-                            document=document_number,
-                            gender=gender,
-                            cellphone=row['celular'],
-                        )
+                    if Customer.objects.filter(document=document_number, is_active=False).exists():
+                        existing_customer = Customer.objects.get(document=document_number, is_active=False)
+                        existing_customer.is_active = True
+                        existing_customer.save()
+                        
+                        continue
 
-                        customers_to_create.append(customer)
+                    customer = Customer(
+                        first_name=row['nombres'],
+                        last_name=row['apellidos'],
+                        document_type=document_type_model,
+                        document=document_number,
+                        gender=gender,
+                        cellphone=row['celular'],
+                    )
 
-                    customer.is_active = True
-                    customer.save()
-
-
+                    customers_to_create.append(customer)
                 try:
                     Customer.objects.bulk_create(customers_to_create)
                     created_customers = Customer.objects.filter(id__in=[c.id for c in customers_to_create])
