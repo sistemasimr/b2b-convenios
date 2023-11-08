@@ -59,14 +59,14 @@ class CustomersLoad(APIView):
                     if isinstance(document_type_excel, str):
                         document_type_excel = document_type_excel.lower()
                     else:
-                        data = {'message': 'Recuerda que los tipos de documento válidos son: cc, ti, ce', 'data': None}
+                        data = {'message': 'Recuerda que los tipos de documento válidos son (cc, ti, ce)', 'data': None}
                         return Response(data, status=400)
 
                     document_number = row['documento']
                     gender = row['genero'].upper()
 
                     if gender not in ('M', 'F','O'):
-                        data = {'message': f'Valor de género no válido: {gender}, recuerda que los permitidos son (M o F)', 'data': None}
+                        data = {'message': f'Valor de género no válido: {gender}, recuerda que los permitidos son (M, F, O)', 'data': None}
                         return Response(data, status=400)
 
                     if document_type_excel in document_type_mapping:
@@ -99,16 +99,23 @@ class CustomersLoad(APIView):
                         data = {'message': 'El número de celular debe contener solo números', 'data': None}
                         return Response(data, status=400)
                     
-                    customer = Customer(
-                        first_name=row['nombres'],
-                        last_name=row['apellidos'],
-                        document_type=document_type_model,
-                        document=document_number,
-                        gender=gender,
-                        cellphone=row['celular'],
-                    )
+                    if Customer.objects.filter(document=document_number).exists():
+                        customer = Customer.objects.get(document=document_number)
+                    else:
+                        customer = Customer(
+                            first_name=row['nombres'],
+                            last_name=row['apellidos'],
+                            document_type=document_type_model,
+                            document=document_number,
+                            gender=gender,
+                            cellphone=row['celular'],
+                        )
 
-                    customers_to_create.append(customer) 
+                        customers_to_create.append(customer)
+
+                    customer.is_active = True
+                    customer.save()
+
 
                 try:
                     Customer.objects.bulk_create(customers_to_create)
