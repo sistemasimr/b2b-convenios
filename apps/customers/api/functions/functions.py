@@ -68,6 +68,12 @@ def validate_customer_cellphone(cellphone):
     else:
         return False
     
+def validate_customer_cellphone_length(cellphone):
+    if len(str(cellphone)) <= 10:
+        return True
+    else:
+        return False
+    
 
 def disable_customer(df):
     

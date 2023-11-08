@@ -99,6 +99,10 @@ class CustomersLoad(APIView):
                         data = {'message': 'El número de celular debe contener solo números', 'data': None}
                         return Response(data, status=400)
                     
+                    if not validate_customer_cellphone_length(row['celular']):
+                        data = {'message': 'El número de celular es demasiado largo. Solo se permite 10 digitos', 'data': None}
+                        return Response(data, status=400)
+                    
                     if Customer.objects.filter(document=document_number).exists():
                         customer = Customer.objects.get(document=document_number)
                     else:
