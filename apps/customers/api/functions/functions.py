@@ -76,25 +76,25 @@ def validate_customer_cellphone_length(cellphone):
     
 
 def disable_customer(df):
-    
     does_not_exist = []
 
     for index, row in df.iterrows():
         document = row['documento']
 
-        try:
-            customer = Customer.objects.get(document=document)
-            customer.is_active = False 
-            customer.save()
-        except Customer.DoesNotExist:
-            does_not_exist.append(f'El usuario {document} no existe')  
-    return does_not_exist  
+        customer = Customer.objects.filter(document=document).first()
+        
+        if customer:
+            Customer.objects.filter(document=document).update(is_active=False)
+        else:
+            does_not_exist.append(f'El usuario {document} no existe')
+
+    return does_not_exist
 
 def file_comerssia():
     try:
         fecha = datetime.now().strftime("%Y%m%d")
         folder_name = 'C:\\cargas'
-        file_name = f'B2B{fecha}.txt'
+        file_name = f'CRECUP{fecha}.txt'
 
         if not os.path.exists(folder_name):
             os.mkdir(folder_name)
@@ -108,7 +108,8 @@ def file_comerssia():
             for row in results:
                 document, quota = row
                 quota = int(quota)
-                line = f'{document}|{quota}|{quota}|0\n'
+                # line_update = f'{document}|{quota}|{quota}|0\n' se comenta esta linea, ya que esta sera para la actualización de cupo
+                line = f'{document}|{quota}\n'
                 file.write(line)
 
         # upload_file_to_ftp(file_name)
