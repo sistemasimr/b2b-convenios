@@ -65,6 +65,15 @@ MIDDLEWARE = [
 
 ]
 
+#CORS_ORIGIN_ALLOW_ALL = True
+
+#CORS_ALLOWED_ORIGINS = [
+#    "http://localhost:3000",
+#    "http://127.0.0.1:9000",
+#    "http://192.168.1.116",
+#]
+
+
 ROOT_URLCONF = 'b2b.urls'
 
 TEMPLATES = [
@@ -140,9 +149,11 @@ SWAGGER_SETTINGS = {
         }
     },
     "JSON_EDITOR" : True,
+    # "DOC_EXPANSION" : "full",
     "LOGIN_URL" : 'rest_framework:login',
     "LOGOUT_URL" : 'rest_framework:logout',
     "DEFAULT_MODEL_RENDERING":"example"
+    # "OPERATIONS_SORTER" : "method",
 }
 
 
@@ -151,6 +162,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'bigjohnsistemas@gmail.com'
+# EMAIL_HOST_PASSWORD = 'Bigjohn2020*bj*'
 EMAIL_HOST_PASSWORD = 'dkkkwfrsabgavlou'
 
 # Internationalization
