@@ -109,7 +109,6 @@ class CustomersLoad(APIView):
                         
                         continue
                     
-
                     customer = Customer(
                         first_name=row['nombres'],
                         last_name=row['apellidos'],
@@ -121,16 +120,16 @@ class CustomersLoad(APIView):
 
                     customers_to_create.append(customer)
                 try:
-                    with transaction.atomic():
-                        Customer.objects.bulk_create(customers_to_create)
-                        created_customers = Customer.objects.filter(id__in=[c.id for c in customers_to_create])
+                    Customer.objects.bulk_create(customers_to_create)
+                    created_customers = Customer.objects.filter(id__in=[c.id for c in customers_to_create])
 
-                        agreement_instance = Agreement.objects.get(id=id_agreement)
+                    agreement_instance = Agreement.objects.get(id=id_agreement)
 
-                        agreement_instance.customers.add(*created_customers)
+                    agreement_instance.customers.add(*created_customers)
+                    
                 except Exception as e:
-                    return Response({"message": str(e)}, status=500)
-                                    
+                   return Response({"message": str(e)}, status=500)
+                    
                 list_customer= list_users()
 
                 try:
@@ -177,9 +176,9 @@ class CustomersLoad(APIView):
                 list_customer = list_users()
                 archive_comerssia = file_comerssia()
 
-                if not isinstance(archive_comerssia,bool) and archive_comerssia:
-                    data = {'message': 'Ha ocurrido un error al guardar la informacion en comerssia'}
-                    return Response(data, status=500)
+                # if not isinstance(archive_comerssia,bool) and archive_comerssia:
+                #     data = {'message': 'Ha ocurrido un error al guardar la informacion en comerssia'}
+                #     return Response(data, status=500)
                       
                 data = {'message': 'Usuarios eliminados con éxito', 'data': list_customer}
                 return Response(data, status=200)
