@@ -1,12 +1,11 @@
 import pandas as pd
-import random
-import openpyxl
-from django.db import IntegrityError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from ...models import * 
 from ..functions.functions import *
+from django.db import transaction
+
 
 
 class CustomersLoad(APIView):
@@ -109,6 +108,7 @@ class CustomersLoad(APIView):
                         existing_customer.save()
                         
                         continue
+                    
 
                     customer = Customer(
                         first_name=row['nombres'],
@@ -121,16 +121,16 @@ class CustomersLoad(APIView):
 
                     customers_to_create.append(customer)
                 try:
-                    Customer.objects.bulk_create(customers_to_create)
-                    created_customers = Customer.objects.filter(id__in=[c.id for c in customers_to_create])
+                    with transaction.atomic():
+                        Customer.objects.bulk_create(customers_to_create)
+                        created_customers = Customer.objects.filter(id__in=[c.id for c in customers_to_create])
 
-                    agreement_instance = Agreement.objects.get(id=id_agreement)
+                        agreement_instance = Agreement.objects.get(id=id_agreement)
 
-                    agreement_instance.customers.add(*created_customers)
-                    
+                        agreement_instance.customers.add(*created_customers)
                 except Exception as e:
-                   return Response({"message": str(e)}, status=500)
-                    
+                    return Response({"message": str(e)}, status=500)
+                                    
                 list_customer= list_users()
 
                 try:
