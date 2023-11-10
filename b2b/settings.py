@@ -43,7 +43,6 @@ INSTALLED_APPS = [
 
 ]
 
-
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -58,15 +57,6 @@ MIDDLEWARE = [
     'b2b.custom_authentication_middleware.CustomAuthenticationMiddleware',
 
 ]
-
-CORS_ORIGIN_ALLOW_ALL = True
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:9000",
-    "http://192.168.1.116",
-]
-
 
 ROOT_URLCONF = 'b2b.urls'
 
@@ -99,7 +89,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',   
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
@@ -124,7 +114,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5), 
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=45),
 }
 
 CACHES = {
@@ -143,20 +133,16 @@ SWAGGER_SETTINGS = {
         }
     },
     "JSON_EDITOR" : True,
-    # "DOC_EXPANSION" : "full",
     "LOGIN_URL" : 'rest_framework:login',
     "LOGOUT_URL" : 'rest_framework:logout',
     "DEFAULT_MODEL_RENDERING":"example"
-    # "OPERATIONS_SORTER" : "method",
 }
 
-
-# Email config 
+# Email config
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'bigjohnsistemas@gmail.com'
-# EMAIL_HOST_PASSWORD = 'Bigjohn2020*bj*'
 EMAIL_HOST_PASSWORD = 'dkkkwfrsabgavlou'
 
 # Internationalization
@@ -190,4 +176,3 @@ try:
     from .local_settings import *
 except ImportError:
     raise Exception("el archivo local_settings.py es requerido para la ejecucion del projecto")
-

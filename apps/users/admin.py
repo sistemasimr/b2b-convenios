@@ -25,11 +25,11 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class PasswordResetCodeAdmin(admin.ModelAdmin):
-    list_display = ('code', 'user', 'created_at', 'expiration_date', 'is_active')
+    list_display = ('user', 'created_at', 'expiration_date', 'is_active')
     list_filter = ('user', 'is_active')
-    search_fields = ('code', 'user__username', 'user__email')
+    search_fields = ( 'created_at', 'expiration_date')
     date_hierarchy = 'created_at'
-
+    readonly_fields = ('code', 'user', 'created_at', 'expiration_date', 'is_active')
 
 admin.site.register(PasswordResetCode, PasswordResetCodeAdmin)
 

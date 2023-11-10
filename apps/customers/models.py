@@ -22,11 +22,6 @@ class Customer(models.Model):
     document = models.CharField(max_length=255, unique=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     cellphone = models.CharField(max_length=255)
-    email = models.EmailField(
-        verbose_name='email address',
-        max_length=255,
-        unique=True,
-    )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
