@@ -93,7 +93,7 @@ def disable_customer(df):
 def file_comerssia():
     try:
         fecha = datetime.now().strftime("%Y%m%d")
-        folder_name = 'commons/files/cargas'
+        folder_name = Path(f'{os.getcwd()}/commons/files/cargas/')
         file_name = f'CRECUP{fecha}.txt'
 
         full_path = os.path.join(folder_name, file_name)
