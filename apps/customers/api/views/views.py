@@ -127,18 +127,17 @@ class CustomersLoad(APIView):
                     agreement_instance = Agreement.objects.get(id=id_agreement)
 
                     agreement_instance.customers.add(*created_customers)
-                except IntegrityError:
-                    pass
-
+                    
+                except Exception as e:
+                   return Response({"message": str(e)}, status=500)
+                    
                 list_customer= list_users()
 
                 try:
                    archive_comerssia = file_comerssia()
                 except Exception as e:
-                # Imprime o registra detalles sobre la excepción
                    return Response({"error_message": str(e)}, status=500)
 
-                      
                 data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': list_customer}
                 return Response(data, status=200)
 
