@@ -131,11 +131,13 @@ class CustomersLoad(APIView):
                     pass
 
                 list_customer= list_users()
-                archive_comerssia = file_comerssia()
 
-                if not isinstance(archive_comerssia,bool) and archive_comerssia:
-                    data = {'message': 'Ha ocurrido un error al guardar la informacion en comerssia'}
-                    return Response(data, status=500)
+                try:
+                   archive_comerssia = file_comerssia()
+                except Exception as e:
+                # Imprime o registra detalles sobre la excepción
+                   return Response({"error_message": str(e)}, status=500)
+
                       
                 data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': list_customer}
                 return Response(data, status=200)
