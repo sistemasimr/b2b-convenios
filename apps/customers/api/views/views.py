@@ -121,12 +121,11 @@ class CustomersLoad(APIView):
                     customers_to_create.append(customer)
                 try:
                     Customer.objects.bulk_create(customers_to_create)
-                    created_customers = Customer.objects.filter(id__in=[c.id for c in customers_to_create])
-
-                    agreement_instance = Agreement.objects.get(id=id_agreement)
-
-                    agreement_instance.customers.add(*created_customers)
                     
+                    created_customers = Customer.objects.filter(document__in=[customer.document for customer in customers_to_create])
+                    agreement = Agreement.objects.get(id=id_agreement)
+                    agreement.customers.add(*created_customers)
+    
                 except Exception as e:
                    return Response({"message": str(e)}, status=500)
                     
