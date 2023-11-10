@@ -45,8 +45,14 @@ class LoginViewUser(TokenObtainPairView):
             return Response(data,status=200)
   
         pattern = '[0-9]+'
-        document = re.findall(pattern, document)
-        document = document[0]
+        document_matches = re.findall(pattern, document)
+
+        if not document_matches:
+            data = {'message': 'Formato de documento inválido', 'data': '', 'code': 2}
+            return Response(data, status=200)
+
+        document = document_matches[0]
+
         
         try:
             user = User.objects.get(document=request.data.get('document'))
