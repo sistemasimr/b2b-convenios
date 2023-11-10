@@ -93,18 +93,21 @@ def disable_customer(df):
 def file_comerssia():
     try:
         fecha = datetime.now().strftime("%Y%m%d")
-        folder_name = 'C:\\cargas'
+        folder_name = 'commons/files/cargas'
         file_name = f'CRECUP{fecha}.txt'
 
+        full_path = os.path.join(folder_name, file_name)
+
+
         if not os.path.exists(folder_name):
-            os.mkdir(folder_name)
+            os.makedirs(folder_name)
 
         cursor_b2b = connections['default'].cursor()
         query = 'SELECT * FROM vw_customers_customers_agreements'
         cursor_b2b.execute(query)
         results = cursor_b2b.fetchall()
 
-        with open(os.path.join(folder_name, file_name), 'w') as file:
+        with open(full_path, 'w') as file:
             for row in results:
                 document, quota = row
                 quota = int(quota)
