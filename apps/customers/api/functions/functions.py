@@ -33,8 +33,8 @@ def validate_empty_columns_delete_customers(df):
 
 
 def validate_customer_names_last_names(first_name,last_name):
-    validate_names_last_names = r"^[A-Za-z ]+$"
-
+    validate_names_last_names = r"^[A-Za-zñÑ ]+$"
+    
     if re.match(validate_names_last_names, first_name) and re.match(validate_names_last_names, last_name):
         return True
     else:
