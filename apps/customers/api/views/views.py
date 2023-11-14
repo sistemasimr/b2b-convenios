@@ -32,7 +32,7 @@ class CustomersLoad(APIView):
 
                 df = pd.read_excel(archive)
 
-                required_columns = ['nombres', 'apellidos', 'tipo_documento', 'documento', 'genero', 'celular']
+                required_columns = ['nombres', 'apellidos', 'tipo_documento', 'documento', 'genero', 'celular','cupo']
 
                 if not all(col in df.columns for col in required_columns):
                     missing_columns = [col for col in required_columns if col not in df.columns]
@@ -115,6 +115,7 @@ class CustomersLoad(APIView):
                         document=document_number,
                         gender=gender,
                         cellphone=row['celular'],
+                        quota=row['cupo']
                     )
 
                     customers_to_create.append(customer)
