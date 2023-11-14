@@ -135,7 +135,7 @@ class CustomersLoad(APIView):
                 except Exception as e:
                    return Response({"error_message": str(e)}, status=500)
 
-                data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': list_customer, 'pruebas': file_comerssiaa}
+                data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': list_customer, 'archivo plano cargado': file_comerssiaa}
                 return Response(data, status=200)
 
             
@@ -172,13 +172,16 @@ class CustomersLoad(APIView):
                     return Response(data, status=500)
     
                 list_customer = list_users()
-                archive_comerssia = file_comerssia()
+                try:
+                   file_comerssiaa = file_comerssia()
+                except Exception as e:
+                   return Response({"error_message": str(e)}, status=500)
 
                 # if not isinstance(archive_comerssia,bool) and archive_comerssia:
                 #     data = {'message': 'Ha ocurrido un error al guardar la informacion en comerssia'}
                 #     return Response(data, status=500)
                       
-                data = {'message': 'Usuarios eliminados con éxito', 'data': list_customer}
+                data = {'message': 'Usuarios eliminados con éxito', 'data': list_customer, 'archivo plano cargado': file_comerssiaa}
                 return Response(data, status=200)
 
         except Exception as e:
