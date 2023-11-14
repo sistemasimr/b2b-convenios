@@ -106,7 +106,6 @@ class CustomersLoad(APIView):
                         existing_customer = Customer.objects.get(document=document_number, is_active=False)
                         existing_customer.is_active = True
                         existing_customer.save()
-                        
                         continue
                     
                     customer = Customer(
@@ -132,11 +131,11 @@ class CustomersLoad(APIView):
                 list_customer= list_users()
 
                 try:
-                   archive_comerssia = file_comerssia()
+                   file_comerssiaa = file_comerssia()
                 except Exception as e:
                    return Response({"error_message": str(e)}, status=500)
 
-                data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': list_customer}
+                data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': list_customer, 'pruebas': file_comerssiaa}
                 return Response(data, status=200)
 
             
