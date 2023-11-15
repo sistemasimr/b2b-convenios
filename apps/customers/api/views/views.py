@@ -102,6 +102,14 @@ class CustomersLoad(APIView):
                         data = {'message': 'El número de celular es demasiado largo. Solo se permite 10 digitos', 'data': None}
                         return Response(data, status=400)
                     
+                    if not validate_customer_quota(row['cupo']):
+                        data = {'message': 'El campo cupo debe contener solo números', 'data': None}
+                        return Response(data, status=400)
+                    
+                    if not validate_customer_quota_range(row['cupo']):
+                        data = {'message': 'El campo cupo debe ser igual o menor a $1.000.000', 'data': None}
+                        return Response(data, status=400)
+
                     if Customer.objects.filter(document=document_number, is_active=False).exists():
                         existing_customer = Customer.objects.get(document=document_number, is_active=False)
                         existing_customer.is_active = True

@@ -14,7 +14,7 @@ import sys
 import traceback
 
 def validate_empty_columns_create_customers(df):
-    empty_columns = ['nombres', 'apellidos', 'tipo_documento', 'documento', 'genero', 'celular']
+    empty_columns = ['nombres', 'apellidos', 'tipo_documento', 'documento', 'genero', 'celular','cupo']
     empty_rows = df[df[empty_columns].isnull().any(axis=1)]
 
     if not empty_rows.empty:
@@ -67,6 +67,24 @@ def validate_customer_cellphone(cellphone):
         return True
     else:
         return False
+    
+def validate_customer_quota(quota):
+    quota_str = str(quota)
+    validate_quota = r'^\d{1,8}(\.\d{1,2})?$'
+
+    if re.match(validate_quota, quota_str):
+        return True
+    else: 
+        return False
+    
+def validate_customer_quota_range(quota):
+    quota_str = str(quota)
+
+    quota_float = float(quota_str)
+    if quota_float > 1000000:
+        return False
+
+    return True
     
 def validate_customer_cellphone_length(cellphone):
     if len(str(cellphone)) <= 10:
