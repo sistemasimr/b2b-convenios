@@ -174,4 +174,5 @@ b2b/local_settings.py
 apps/customers/migrations
 
 commons/files/cargas/*
+/staticfiles
 
