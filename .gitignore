@@ -173,5 +173,5 @@ apps/users/migrations
 b2b/local_settings.py
 apps/customers/migrations
 
-commons/files/cargas/
+commons/files/cargas/*
 
