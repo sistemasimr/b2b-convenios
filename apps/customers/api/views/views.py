@@ -143,11 +143,16 @@ class CustomersLoad(APIView):
                    file_comerssiaa = file_comerssia()
                 except Exception as e:
                    return Response({"error_message": str(e)}, status=500)
+                
+                upload_file_to_ftp()
 
+                if upload_file_to_ftp is False:
+                    data = {'message': 'Error al cargar el archivo', 'data': None,'archivo plano cargado': file_comerssiaa}
+                    return Response(data, status=400)
+                
                 data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': list_customer, 'archivo plano cargado': file_comerssiaa}
                 return Response(data, status=200)
 
-            
             elif type == 'delete':
 
                 df = pd.read_excel(archive)

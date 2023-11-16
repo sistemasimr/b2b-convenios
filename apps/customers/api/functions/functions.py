@@ -115,8 +115,7 @@ def file_comerssia():
         file_name = f'CRECUP{fecha}.txt'
 
         full_path = os.path.join(folder_name, file_name)
-
-
+        
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
 
@@ -133,36 +132,38 @@ def file_comerssia():
                 line = f'{document}|{quota}\n'
                 file.write(line)
 
-        # upload_file_to_ftp(file_name)
-        # se comenta la linea del archivo ftp mientras se puede hacer pruebas
-
         return True 
     except Exception as e:
         error_message = f'Error al generar y guardar el archivo TXT: {str(e)}'
         return {'message': error_message}
     
-def upload_file_to_ftp(file_name):
+def upload_file_to_ftp():
     try:
-        file_path = Path(f'C:\\cargas') / file_name
+        fecha = datetime.now().strftime("%Y%m%d")
+        file_name = f'CRECUP{fecha}.txt'
+
+        file_path = Path(os.path.join(os.getcwd(), f'commons/files/cargas/{file_name}'))
 
         ftp_comerssia = conexion_ftp()
-        ftp_comerssia = ftp_comerssia.getInstance()
-        ftp_comerssia.cwd('Interfaces/Salida')
-        ftp_comerssia.encoding='utf-8'
+        ftp_comerssia = conexion_ftp().obtener_ftp_salida()
+        ftp_comerssia.encoding = 'utf-8'
         ftp_comerssia.sendcmd('OPTS UTF8 ON')
 
-        file = open(file_path,'rb')
-        ftp_comerssia.storbinary("STOR "+ file_name, file, 1024)
+        with open(file_path, 'rb') as file:
+            ftp_comerssia.storbinary(f"STOR {file_name}", file, 1024)
 
         ftp_comerssia.quit()
 
+        print(f'¡Éxito! Archivo {file_name} cargado correctamente al servidor FTP.')
+        return True
+
     except Exception as e:
         traceback.print_exc()
-        e = sys.exc_info()[1]
-        data = {'message': str(e), 'code': 2, 'data': None}
-        return Response(data, status=200)
-    
+        error_message = f'{str(e)}'
+        print(error_message)
+        return False,error_message
 
+    
 def list_users():
     customers = Customer.objects.all().order_by('-is_active')
     serializer = CustomerSerializer(customers, many=True)

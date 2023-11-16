@@ -5,7 +5,6 @@ import ftplib
 import traceback
 from django.conf import settings
 
-
 class cursores:
     def __init__(self, nombre_bd):
         self.nombre_bd = nombre_bd
@@ -23,7 +22,6 @@ class cursores:
     def close_cursor(self):
         self.cursor.close()
 
-
 class conexion_comerssia:
     def __init__(self):
         self.server = 'tcp:comerssiamirror.eastus2.cloudapp.azure.com,38693'
@@ -35,30 +33,20 @@ class conexion_comerssia:
     def get_cursor(self):
         return self.cursor
 
-
 class conexion_ftp:
-	def __init__(self):
-		try:
-			# self.__ftp = ftplib.FTP('srv09.comerssia.com')
-			# self.__ftp.login('bigjohn', 'A1ktm23o')
-			self.__ftp = ftplib.FTP(settings.FTP_COMERSSIA)
-			self.__ftp.login('bigjohn', 'A1ktm23o')
-			# self.__ftp.cwd('BIGJOHN') 
-		except:
-			traceback.print_exc()
-	
-	def obtener_ftp_salida(self):
-		try:
-			self.__ftp.cwd('Interfaces/Salida')
-			self.__ftp.encoding='utf-8'
-			self.__ftp.sendcmd('OPTS UTF8 ON')
-			return self.__ftp
-		except:
-			traceback.print_exc()
+    def __init__(self):
+        try:
+            self.__ftp = ftplib.FTP('auditoria.comerssia.com')
+            self.__ftp.login('bigjohn', 'A1ktm23o')
+        except:
+            traceback.print_exc()
+    
+    def obtener_ftp_salida(self):
+        try:
+            self.__ftp.cwd('Interfaces/Salida')
+            self.__ftp.encoding='utf-8'
+            self.__ftp.sendcmd('OPTS UTF8 ON')
+            return self.__ftp
+        except:
+            traceback.print_exc()
    
-	def getInstance(self):
-		try:
-			
-			return self.__ftp
-		except:
-			traceback.print_exc()        
