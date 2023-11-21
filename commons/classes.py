@@ -36,7 +36,7 @@ class conexion_comerssia:
 class conexion_ftp:
     def __init__(self):
         try:
-            self.__ftp = ftplib.FTP('auditoria.comerssia.com')
+            self.__ftp = ftplib.FTP('srv09.comerssia.com')
             self.__ftp.login('bigjohn', 'A1ktm23o')
         except:
             traceback.print_exc()
