@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from ...models import * 
 from ..functions.functions import *
-from django.db import transaction
+from django.db.models import F
 
 
 
@@ -74,9 +74,9 @@ class CustomersLoad(APIView):
                         data = {'message': f'Tipo de documento: {document_type_excel} no válido, recuerda que los permitidos son (cc,ti o ce)', 'data': None}
                         return Response(data, status=400) 
                     
-                    if Customer.objects.filter(document=document_number,is_active=True).exists():
-                        data = {'message': f'El documento {document_number} ya existe en la base de datos', 'data': None}
-                        return Response(data, status=409)
+                    if Customer.objects.filter(document=document_number, is_active=True).exists():
+                        Customer.objects.filter(document=document_number, is_active=True).update(quota=row['cupo'],updated_at=timezone.now())
+                        continue
 
                     if not Agreement.objects.filter(id=id_agreement).exists():
                         data = {'message': f"El convenio con id: {id_agreement} no existe en la base de datos", 'data': None}
@@ -111,9 +111,7 @@ class CustomersLoad(APIView):
                         return Response(data, status=400)
 
                     if Customer.objects.filter(document=document_number, is_active=False).exists():
-                        existing_customer = Customer.objects.get(document=document_number, is_active=False)
-                        existing_customer.is_active = True
-                        existing_customer.save()
+                        Customer.objects.filter(document=document_number, is_active=False).update(is_active=True, quota=row['cupo'],updated_at=timezone.now())
                         continue
                     
                     customer = Customer(
@@ -141,16 +139,22 @@ class CustomersLoad(APIView):
 
                 try:
                    file_comerssiaa = file_comerssia()
+                   file_comerssia_update = file_comerssia_update_quota()
                 except Exception as e:
                    return Response({"error_message": str(e)}, status=500)
                 
                 upload_file_to_ftp()
+                upload_file_to_ftp_update_quota()
 
                 if upload_file_to_ftp is False:
                     data = {'message': 'Error al cargar el archivo', 'data': None,'archivo plano cargado': file_comerssiaa}
                     return Response(data, status=400)
                 
-                data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': list_customer, 'archivo plano cargado': file_comerssiaa}
+                if upload_file_to_ftp_update_quota is False:
+                    data = {'message': 'Error al cargar el archivo', 'data': None,'archivo plano cargado': file_comerssia_update}
+                    return Response(data, status=400)
+                
+                data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': list_customer, 'archivo plano cargado': file_comerssiaa, 'arhivo plano update': file_comerssia_update}
                 return Response(data, status=200)
 
             elif type == 'delete':
@@ -187,7 +191,9 @@ class CustomersLoad(APIView):
     
                 list_customer = list_users()
                 try:
-                   file_comerssiaa = file_comerssia()
+                    file_comerssiaa = file_comerssia()
+                    file_comerssia_update = file_comerssia_update_quota()
+
                 except Exception as e:
                    return Response({"error_message": str(e)}, status=500)
 

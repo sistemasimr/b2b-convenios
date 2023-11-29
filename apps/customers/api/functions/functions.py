@@ -137,10 +137,64 @@ def file_comerssia():
         error_message = f'Error al generar y guardar el archivo TXT: {str(e)}'
         return {'message': error_message}
     
+def file_comerssia_update_quota():
+    try:
+        fecha = datetime.now().strftime("%Y%m%d")
+        folder_name = Path(f'{os.getcwd()}/commons/files/cargas/')
+        file_name = f'AJUCRE{fecha}.txt'
+
+        full_path = os.path.join(folder_name, file_name)
+        
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
+
+        cursor_b2b = connections['default'].cursor()
+        query = 'SELECT * FROM vw_update_quota_customers'
+        cursor_b2b.execute(query)
+        results = cursor_b2b.fetchall()
+
+        with open(full_path, 'w') as file:
+            for row in results:
+                document, quota = row
+                quota = int(quota)
+                line = f'{document}|{quota}\n'
+                file.write(line)
+
+        return True 
+    except Exception as e:
+        error_message = f'Error al generar y guardar el archivo TXT: {str(e)}'
+        return {'message': error_message}
+    
 def upload_file_to_ftp():
     try:
         fecha = datetime.now().strftime("%Y%m%d")
         file_name = f'CRECUP{fecha}.txt'
+
+        file_path = Path(os.path.join(os.getcwd(), f'commons/files/cargas/{file_name}'))
+
+        ftp_comerssia = conexion_ftp()
+        ftp_comerssia = conexion_ftp().obtener_ftp_salida()
+        ftp_comerssia.encoding = 'utf-8'
+        ftp_comerssia.sendcmd('OPTS UTF8 ON')
+
+        with open(file_path, 'rb') as file:
+            ftp_comerssia.storbinary(f"STOR {file_name}", file, 1024)
+
+        ftp_comerssia.quit()
+
+        print(f'¡Éxito! Archivo {file_name} cargado correctamente al servidor FTP.')
+        return True
+
+    except Exception as e:
+        traceback.print_exc()
+        error_message = f'{str(e)}'
+        print(error_message)
+        return False,error_message
+    
+def upload_file_to_ftp_update_quota():
+    try:
+        fecha = datetime.now().strftime("%Y%m%d")
+        file_name = f'AJUCRE{fecha}.txt'
 
         file_path = Path(os.path.join(os.getcwd(), f'commons/files/cargas/{file_name}'))
 

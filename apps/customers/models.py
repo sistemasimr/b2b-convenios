@@ -24,7 +24,7 @@ class Customer(models.Model):
     cellphone = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(null=True)
     agreements = models.ManyToManyField(Agreement, related_name='customers')
     quota = models.DecimalField(max_digits=10, decimal_places=2)
     history = HistoricalRecords()
