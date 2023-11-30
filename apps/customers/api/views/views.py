@@ -139,22 +139,22 @@ class CustomersLoad(APIView):
 
                 try:
                    file_comerssiaa = file_comerssia()
-                #    file_comerssia_update = file_comerssia_update_quota()
+                   file_comerssia_update = file_comerssia_update_quota()
                 except Exception as e:
                    return Response({"error_message": str(e)}, status=500)
                 
                 upload_file_to_ftp()
-                # upload_file_to_ftp_update_quota()
+                upload_file_to_ftp_update_quota()
 
                 if upload_file_to_ftp is False:
                     data = {'message': 'Error al cargar el archivo', 'data': None,'archivo plano cargado': file_comerssiaa}
                     return Response(data, status=400)
                 
-                # if upload_file_to_ftp_update_quota is False:
-                #     data = {'message': 'Error al cargar el archivo', 'data': None,'archivo plano cargado': file_comerssia_update}
-                #     return Response(data, status=400)
+                if upload_file_to_ftp_update_quota is False:
+                    data = {'message': 'Error al cargar el archivo', 'data': None,'archivo plano cargado': file_comerssia_update}
+                    return Response(data, status=400)
                 
-                data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': list_customer, 'archivo plano cargado': file_comerssiaa}
+                data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': list_customer, 'archivo plano cargado': file_comerssiaa, 'arhivo plano update': file_comerssia_update}
                 return Response(data, status=200)
 
             elif type == 'delete':
@@ -192,7 +192,7 @@ class CustomersLoad(APIView):
                 list_customer = list_users()
                 try:
                     file_comerssiaa = file_comerssia()
-                    # file_comerssia_update = file_comerssia_update_quota()
+                    file_comerssia_update = file_comerssia_update_quota()
 
                 except Exception as e:
                    return Response({"error_message": str(e)}, status=500)
@@ -218,6 +218,5 @@ class ListCustomers(APIView):
         except Exception as e:
             data = {'message': 'Error al listar clientes', 'data': str(e)}
             return Response(data, status=500)
-
 
 

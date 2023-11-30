@@ -31,7 +31,6 @@ def validate_empty_columns_delete_customers(df):
 
     return False
 
-
 def validate_customer_names_last_names(first_name,last_name):
     validate_names_last_names = r"^[A-Za-zñÑáéíóúÁÉÍÓÚüÜ\s]+$"
     
@@ -124,26 +123,11 @@ def file_comerssia():
         cursor_b2b.execute(query)
         results = cursor_b2b.fetchall()
 
-        #esta parte sera temporal mientras comerssia soluciona el tema de actualización de cupos
-        cursor_comerssia = connections['bigjohndb'].cursor()
-        query_comerssia = """select cfnvalor1,clicodigo from BIGJOHN.dbo.CodigosFinancieros 
-                             where cfndescripcion = 'Clientes Venta Credito'"""
-        cursor_comerssia.execute(query_comerssia)
-        results_financieros = cursor_comerssia.fetchall()
-
-        financiero_mapping = {clicodigo: cfnvalor1 for cfnvalor1, clicodigo in results_financieros}
-
-        #hasta aca-------------
-
         with open(full_path, 'w') as file:
             for row in results:
                 document, quota = row
                 quota = int(quota)
-
-                #Esta validacion tambien es temporal
-                if document in financiero_mapping:
-                    quota -= int(financiero_mapping[document])
-                    
+                # line_update = f'{document}|{quota}|{quota}|0\n' se comenta esta linea, ya que esta sera para la actualización de cupo
                 line = f'{document}|{quota}\n'
                 file.write(line)
 
@@ -152,33 +136,33 @@ def file_comerssia():
         error_message = f'Error al generar y guardar el archivo TXT: {str(e)}'
         return {'message': error_message}
     
-# def file_comerssia_update_quota():
-#     try:
-#         fecha = datetime.now().strftime("%Y%m%d")
-#         folder_name = Path(f'{os.getcwd()}/commons/files/cargas/')
-#         file_name = f'AJUCRE{fecha}.txt'
+def file_comerssia_update_quota():
+    try:
+        fecha = datetime.now().strftime("%Y%m%d")
+        folder_name = Path(f'{os.getcwd()}/commons/files/cargas/')
+        file_name = f'AJUCRE{fecha}.txt'
 
-#         full_path = os.path.join(folder_name, file_name)
+        full_path = os.path.join(folder_name, file_name)
         
-#         if not os.path.exists(folder_name):
-#             os.makedirs(folder_name)
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
 
-#         cursor_b2b = connections['default'].cursor()
-#         query = 'SELECT * FROM vw_update_quota_customers'
-#         cursor_b2b.execute(query)
-#         results = cursor_b2b.fetchall()
+        cursor_b2b = connections['default'].cursor()
+        query = 'SELECT * FROM vw_update_quota_customers'
+        cursor_b2b.execute(query)
+        results = cursor_b2b.fetchall()
 
-#         with open(full_path, 'w') as file:
-#             for row in results:
-#                 document, quota = row
-#                 quota = int(quota)
-#                 line = f'{document}|{quota}\n'
-#                 file.write(line)
+        with open(full_path, 'w') as file:
+            for row in results:
+                document, quota = row
+                quota = int(quota)
+                line = f'{document}|{quota}|{quota}|0\n'
+                file.write(line)
 
-#         return True 
-#     except Exception as e:
-#         error_message = f'Error al generar y guardar el archivo TXT: {str(e)}'
-#         return {'message': error_message}
+        return True 
+    except Exception as e:
+        error_message = f'Error al generar y guardar el archivo TXT: {str(e)}'
+        return {'message': error_message}
     
 def upload_file_to_ftp():
     try:
@@ -206,31 +190,31 @@ def upload_file_to_ftp():
         print(error_message)
         return False,error_message
     
-# def upload_file_to_ftp_update_quota():
-#     try:
-#         fecha = datetime.now().strftime("%Y%m%d")
-#         file_name = f'AJUCRE{fecha}.txt'
+def upload_file_to_ftp_update_quota():
+    try:
+        fecha = datetime.now().strftime("%Y%m%d")
+        file_name = f'AJUCRE{fecha}.txt'
 
-#         file_path = Path(os.path.join(os.getcwd(), f'commons/files/cargas/{file_name}'))
+        file_path = Path(os.path.join(os.getcwd(), f'commons/files/cargas/{file_name}'))
 
-#         ftp_comerssia = conexion_ftp()
-#         ftp_comerssia = conexion_ftp().obtener_ftp_salida()
-#         ftp_comerssia.encoding = 'utf-8'
-#         ftp_comerssia.sendcmd('OPTS UTF8 ON')
+        ftp_comerssia = conexion_ftp()
+        ftp_comerssia = conexion_ftp().obtener_ftp_salida()
+        ftp_comerssia.encoding = 'utf-8'
+        ftp_comerssia.sendcmd('OPTS UTF8 ON')
 
-#         with open(file_path, 'rb') as file:
-#             ftp_comerssia.storbinary(f"STOR {file_name}", file, 1024)
+        with open(file_path, 'rb') as file:
+            ftp_comerssia.storbinary(f"STOR {file_name}", file, 1024)
 
-#         ftp_comerssia.quit()
+        ftp_comerssia.quit()
 
-#         print(f'¡Éxito! Archivo {file_name} cargado correctamente al servidor FTP.')
-#         return True
+        print(f'¡Éxito! Archivo {file_name} cargado correctamente al servidor FTP.')
+        return True
 
-#     except Exception as e:
-#         traceback.print_exc()
-#         error_message = f'{str(e)}'
-#         print(error_message)
-#         return False,error_message
+    except Exception as e:
+        traceback.print_exc()
+        error_message = f'{str(e)}'
+        print(error_message)
+        return False,error_message
 
     
 def list_users():
@@ -239,6 +223,3 @@ def list_users():
     return serializer.data
 
     
-
-
-
