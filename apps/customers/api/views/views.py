@@ -51,6 +51,7 @@ class CustomersLoad(APIView):
 
                 id_agreement = 1
                 customers_to_create = []
+                existing_customers = {} 
 
                 for index, row in df.iterrows():
                     document_type_excel = row['tipo_documento']
@@ -73,10 +74,6 @@ class CustomersLoad(APIView):
                     else:
                         data = {'message': f'Tipo de documento: {document_type_excel} no válido, recuerda que los permitidos son (cc,ti o ce)', 'data': None}
                         return Response(data, status=400) 
-                    
-                    if Customer.objects.filter(document=document_number, is_active=True).exists():
-                        Customer.objects.filter(document=document_number, is_active=True).update(quota=row['cupo'],updated_at=timezone.now())
-                        continue
 
                     if not Agreement.objects.filter(id=id_agreement).exists():
                         data = {'message': f"El convenio con id: {id_agreement} no existe en la base de datos", 'data': None}
@@ -109,10 +106,18 @@ class CustomersLoad(APIView):
                     if not validate_customer_quota_range(row['cupo']):
                         data = {'message': 'El campo cupo debe ser igual o menor a $1.000.000', 'data': None}
                         return Response(data, status=400)
-
-                    if Customer.objects.filter(document=document_number, is_active=False).exists():
-                        Customer.objects.filter(document=document_number, is_active=False).update(is_active=True, quota=row['cupo'],updated_at=timezone.now())
+                    
+                    if Customer.objects.filter(document=document_number).exists():
+                        existing_customers[document_number] = {
+                            'first_name': row['nombres'],
+                            'last_name': row['apellidos']
+                        }
                         continue
+                    
+
+                    # if Customer.objects.filter(document=document_number, is_active=False).exists():
+                    #     Customer.objects.filter(document=document_number, is_active=False).update(is_active=True, quota=row['cupo'],updated_at=timezone.now())
+                    #     continue
                     
                     customer = Customer(
                         first_name=row['nombres'],
@@ -131,6 +136,7 @@ class CustomersLoad(APIView):
                     created_customers = Customer.objects.filter(document__in=[customer.document for customer in customers_to_create])
                     agreement = Agreement.objects.get(id=id_agreement)
                     agreement.customers.add(*created_customers)
+                    
     
                 except Exception as e:
                    return Response({"message": str(e)}, status=500)
@@ -138,24 +144,19 @@ class CustomersLoad(APIView):
                 list_customer= list_users()
 
                 try:
-                   file_comerssiaa = file_comerssia()
-                   file_comerssia_update = file_comerssia_update_quota()
+                   file_comerssiaa = file_comerssia(existing_customers)
                 except Exception as e:
                    return Response({"error_message": str(e)}, status=500)
                 
-                upload_file_to_ftp()
-                upload_file_to_ftp_update_quota()
-
-                if upload_file_to_ftp is False:
-                    data = {'message': 'Error al cargar el archivo', 'data': None,'archivo plano cargado': file_comerssiaa}
-                    return Response(data, status=400)
+                # upload_file_to_ftp() descomentar esto cuando se vaya a desplegar a dev
                 
-                if upload_file_to_ftp_update_quota is False:
-                    data = {'message': 'Error al cargar el archivo', 'data': None,'archivo plano cargado': file_comerssia_update}
-                    return Response(data, status=400)
-                
-                data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': list_customer, 'archivo plano cargado': file_comerssiaa, 'arhivo plano update': file_comerssia_update}
-                return Response(data, status=200)
+                if existing_customers:
+                    existing_customers_message = '\n {}'.format(',\n'.join(map(str, existing_customers)))
+                    data = {'message': 'Archivo procesado, estos  documentos ya existen en el sistema:\n{}'.format(existing_customers_message), 'data': list_customer, 'archivo plano cargado': file_comerssiaa}
+                    return Response(data, status=200)
+                else:
+                    data = {'message': 'Archivo Excel cargado y procesado con éxito', 'data': list_customer, 'archivo plano cargado': file_comerssiaa}
+                    return Response(data, status=200)
 
             elif type == 'delete':
 
@@ -190,18 +191,8 @@ class CustomersLoad(APIView):
                     return Response(data, status=500)
     
                 list_customer = list_users()
-                try:
-                    file_comerssiaa = file_comerssia()
-                    file_comerssia_update = file_comerssia_update_quota()
-
-                except Exception as e:
-                   return Response({"error_message": str(e)}, status=500)
-
-                # if not isinstance(archive_comerssia,bool) and archive_comerssia:
-                #     data = {'message': 'Ha ocurrido un error al guardar la informacion en comerssia'}
-                #     return Response(data, status=500)
-                      
-                data = {'message': 'Usuarios eliminados con éxito', 'data': list_customer, 'archivo plano cargado': file_comerssiaa}
+  
+                data = {'message': 'Usuarios eliminados con éxito', 'data': list_customer}
                 return Response(data, status=200)
 
         except Exception as e:
