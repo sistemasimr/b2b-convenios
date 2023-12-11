@@ -113,12 +113,7 @@ class CustomersLoad(APIView):
                             'last_name': row['apellidos']
                         }
                         continue
-                    
-
-                    # if Customer.objects.filter(document=document_number, is_active=False).exists():
-                    #     Customer.objects.filter(document=document_number, is_active=False).update(is_active=True, quota=row['cupo'],updated_at=timezone.now())
-                    #     continue
-                    
+     
                     customer = Customer(
                         first_name=row['nombres'],
                         last_name=row['apellidos'],
@@ -147,7 +142,7 @@ class CustomersLoad(APIView):
                 except Exception as e:
                    return Response({"error_message": str(e)}, status=500)
                 
-                # upload_file_to_ftp() descomentar esto cuando se vaya a desplegar a dev
+                # upload_file_to_ftp() descomentar esto cuando se vaya a desplegar a pro
                 
                 if existing_customers:
                     existing_customers_message = '\n {}'.format(',\n'.join(map(str, existing_customers)))
@@ -173,7 +168,6 @@ class CustomersLoad(APIView):
 
                     data = {'message': message, 'data': None}
                     return Response(data, status=400)
-
                 
                 if df.empty:
                     data = {'message': 'El archivo Excel está vacío.', 'data': None}
@@ -194,8 +188,85 @@ class CustomersLoad(APIView):
                 list_customer = list_users()
                 send_delete_customer_email(email,list_documents)
 
-                data = {'message': 'Usuarios eliminados con éxito', 'data': list_customer}
+                data = {'message': 'Clientes eliminados con éxito', 'data': list_customer}
                 return Response(data, status=200)
+            
+            elif type == 'update':
+
+                df = pd.read_excel(archive)
+                required_columns = ['documento','cupo']
+
+                if not all(col in df.columns for col in required_columns) or len(df.columns) > 2:
+                    if len(df.columns) > 1:
+                        message = 'El archivo Excel tiene más de un encabezado. Debe tener solo dos encabezados llamado "documento" y "cupo".'
+                    else:
+                        missing_columns = [col for col in required_columns if col not in df.columns]
+                        message = f'Falta el encabezado en el archivo Excel: {", ".join(missing_columns)}'
+
+                    data = {'message': message, 'data': None}
+                    return Response(data, status=400)
+                
+                if df.empty:
+                    data = {'message': 'El archivo Excel está vacío.', 'data': None}
+                    return Response(data, status=400)
+                
+                validate_create = validate_empty_columns_update_customers(df)
+
+                if validate_create:
+                    data = {'message': 'No pueden ir columnas vacías'}
+                    return Response(data, status=500)
+                
+                clients_not_found = []
+                clients_could_not_update = []
+                
+                for index, row in df.iterrows():
+
+                    if not validate_customer_quota_negative(row['cupo']):
+                        data = {'message': f'El campo cupo para el documento {row["documento"]} debe contener solo números.', 'data': None}
+                        return Response(data, status=400)
+
+                    if not validate_customer_quota_range(row['cupo']):
+                        data = {'message': f'El campo cupo para el documento {row["documento"]} debe ser igual o menor a $1.000.000.', 'data': None}
+                        return Response(data, status=400)
+                    
+                    customer = Customer.objects.filter(document=row['documento']).first()
+
+                    if customer is not None:
+                        current_quota = customer.quota
+                        new_quota = row['cupo']
+
+                        if new_quota < 0 and abs(new_quota) > current_quota:
+                            clients_could_not_update.append(row['documento'])
+                        else:
+                            if row['cupo'] < 0:
+                                Customer.objects.filter(document=row['documento'], is_active=True).update(quota=current_quota - abs(row['cupo']), updated_at=timezone.now())
+                            else:
+                                Customer.objects.filter(document=row['documento'], is_active=True).update(quota=current_quota + row['cupo'], updated_at=timezone.now())
+                    else:
+                        clients_not_found.append(row['documento'])
+
+
+                    customer_inactive = Customer.objects.filter(document=row['documento'], is_active=False).first()
+
+                    if customer_inactive is not None:
+                        Customer.objects.filter(document=row['documento'], is_active=False).update(is_active=True, updated_at=timezone.now())
+
+
+                list_customer = list_users()
+                success_message = 'Clientes actualizados con éxito'
+
+                if clients_not_found:
+                    not_found_message = f'No se encontraron clientes con los siguientes documentos: {", ".join(map(str, clients_not_found))}'
+                    success_message += f', excepto los siguientes: {not_found_message}'
+
+                if clients_could_not_update:
+                    could_not_update_message = f'No se pudo disminuir los cupos a los siguientes documentos debido a que el nuevo cupo no puede ser mayor al actual: {", ".join(map(str, clients_could_not_update))}'
+                    success_message += f'. {could_not_update_message}'
+
+
+                data = {'message': success_message, 'data': list_customer}
+                return Response(data, status=200)
+            
 
         except Exception as e:
             data = {'message': 'Error al procesar el archivo Excel', 'data': str(e)}

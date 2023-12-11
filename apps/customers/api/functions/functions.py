@@ -33,6 +33,16 @@ def validate_empty_columns_delete_customers(df):
 
     return False
 
+def validate_empty_columns_update_customers(df):
+    empty_columns = ['documento','cupo']
+    empty_rows = df[df[empty_columns].isnull().any(axis=1)]
+
+    if not empty_rows.empty:
+        return True
+
+    return False
+
+
 def validate_customer_names_last_names(first_name,last_name):
     validate_names_last_names = r"^[A-Za-zñÑáéíóúÁÉÍÓÚüÜ\s]+$"
     
@@ -77,6 +87,16 @@ def validate_customer_quota(quota):
         return True
     else: 
         return False
+    
+def validate_customer_quota_negative(quota):
+    quota_str = str(quota)
+    validate_quota = r'^-?\d{1,8}(\.\d{1,2})?$'
+
+    if re.match(validate_quota, quota_str):
+        return True
+    else:
+        return False
+
     
 def validate_customer_quota_range(quota):
     quota_str = str(quota)
@@ -183,61 +203,37 @@ def file_comerssia(existing_customers):
 #         print(error_message)
 #         return False,error_message
     
+def file_comerssia_update(existing_customers):
+    try:
+        fecha = datetime.now().strftime("%Y%m%d")
+        folder_name = Path(f'{os.getcwd()}/commons/files/cargas/')
+        file_name = f'AUMCRE{fecha}.txt'
 
-# def file_comerssia_update_quota():
-#     try:
-#         fecha = datetime.now().strftime("%Y%m%d")
-#         folder_name = Path(f'{os.getcwd()}/commons/files/cargas/')
-#         file_name = f'AJUCRE{fecha}.txt'
-
-#         full_path = os.path.join(folder_name, file_name)
+        full_path = os.path.join(folder_name, file_name)
         
-#         if not os.path.exists(folder_name):
-#             os.makedirs(folder_name)
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
 
-#         cursor_b2b = connections['default'].cursor()
-#         query = 'SELECT * FROM vw_update_quota_customers'
-#         cursor_b2b.execute(query)
-#         results = cursor_b2b.fetchall()
+        cursor_b2b = connections['default'].cursor()
+        query = 'SELECT * FROM vw_customers_customers_agreements'
+        cursor_b2b.execute(query)
+        results = cursor_b2b.fetchall()
 
-#         with open(full_path, 'w') as file:
-#             for row in results:
-#                 document, quota = row
-#                 quota = int(quota)
-#                 line = f'{document}|{quota}|{quota}|0\n'
-#                 file.write(line)
+        existing_documents = set(existing_customers.keys())
 
-#         return True 
-#     except Exception as e:
-#         error_message = f'Error al generar y guardar el archivo TXT: {str(e)}'
-#         return {'message': error_message}
+        with open(full_path, 'w') as file:
+            for row in results:
+                document, quota = row
+                quota = int(quota)
 
-# def upload_file_to_ftp_update_quota():
-#     try:
-#         fecha = datetime.now().strftime("%Y%m%d")
-#         file_name = f'AJUCRE{fecha}.txt'
+                if int(document) not in existing_documents:
+                    line = f'{document}|{quota}\n'
+                    file.write(line)
 
-#         file_path = Path(os.path.join(os.getcwd(), f'commons/files/cargas/{file_name}'))
-
-#         ftp_comerssia = conexion_ftp()
-#         ftp_comerssia = conexion_ftp().obtener_ftp_salida()
-#         ftp_comerssia.encoding = 'utf-8'
-#         ftp_comerssia.sendcmd('OPTS UTF8 ON')
-
-#         with open(file_path, 'rb') as file:
-#             ftp_comerssia.storbinary(f"STOR {file_name}", file, 1024)
-
-#         ftp_comerssia.quit()
-
-#         print(f'¡Éxito! Archivo {file_name} cargado correctamente al servidor FTP.')
-#         return True
-
-#     except Exception as e:
-#         traceback.print_exc()
-#         error_message = f'{str(e)}'
-#         print(error_message)
-#         return False,error_message
-
+        return True 
+    except Exception as e:
+        error_message = f'Error al generar y guardar el archivo TXT: {str(e)}'
+        return {'message': error_message}
     
 def list_users():
     customers = Customer.objects.filter(is_active=True).order_by('-id')
