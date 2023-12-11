@@ -137,7 +137,6 @@ class CustomersLoad(APIView):
                     agreement = Agreement.objects.get(id=id_agreement)
                     agreement.customers.add(*created_customers)
                     
-    
                 except Exception as e:
                    return Response({"message": str(e)}, status=500)
                     
@@ -162,7 +161,9 @@ class CustomersLoad(APIView):
 
                 df = pd.read_excel(archive)
                 required_columns = ['documento']
-                
+                list_documents = df['documento'].tolist()
+                email = 'mjaramillo@imr.com.co' #cambiar correo cuando se despliege a producción
+
                 if not all(col in df.columns for col in required_columns) or len(df.columns) > 1:
                     if len(df.columns) > 1:
                         message = 'El archivo Excel tiene más de un encabezado. Debe tener solo un encabezado llamado "documento".'
@@ -191,7 +192,8 @@ class CustomersLoad(APIView):
                     return Response(data, status=500)
     
                 list_customer = list_users()
-  
+                send_delete_customer_email(email,list_documents)
+
                 data = {'message': 'Usuarios eliminados con éxito', 'data': list_customer}
                 return Response(data, status=200)
 

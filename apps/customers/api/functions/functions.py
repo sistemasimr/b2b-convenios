@@ -3,6 +3,8 @@ from datetime import datetime
 from django.db import connections
 from pathlib import Path
 from rest_framework.response import Response
+from django.core.mail import EmailMessage
+
 
 from apps.agreement.models import Agreement
 from commons.classes import conexion_ftp
@@ -106,6 +108,21 @@ def disable_customer(df):
             does_not_exist.append(f'El usuario {document} no existe')
 
     return does_not_exist
+
+
+def send_delete_customer_email(email,documents):
+    documents_formatted = ",<br>".join(map(str, documents))
+
+    menssage = f"Estos son los clientes que han sido eliminados: <br> <br> {documents_formatted} <br> <br> \n"
+    email = EmailMessage(
+        subject="Clientes eliminados de venta credito en b2b",
+        body=menssage,
+        from_email="Clientes eliminados de venta credito en b2b <bigjohnsistemas@gmail.com>",
+        to=[email],
+        headers={"X-MJ-TemplateLanguage": 1},
+    )
+    email.content_subtype = "html"
+    email.send()
 
 def file_comerssia(existing_customers):
     try:
