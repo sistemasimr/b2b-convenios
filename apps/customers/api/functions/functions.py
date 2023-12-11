@@ -203,34 +203,24 @@ def file_comerssia(existing_customers):
 #         print(error_message)
 #         return False,error_message
     
-def file_comerssia_update(existing_customers):
+def file_comerssia_update_discre(quota,document):
     try:
         fecha = datetime.now().strftime("%Y%m%d")
         folder_name = Path(f'{os.getcwd()}/commons/files/cargas/')
-        file_name = f'AUMCRE{fecha}.txt'
+        file_name = f'DISCRE{fecha}.txt'
+        quota = quota * (-1)
 
         full_path = os.path.join(folder_name, file_name)
         
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
 
-        cursor_b2b = connections['default'].cursor()
-        query = 'SELECT * FROM vw_customers_customers_agreements'
-        cursor_b2b.execute(query)
-        results = cursor_b2b.fetchall()
-
-        existing_documents = set(existing_customers.keys())
-
         with open(full_path, 'w') as file:
-            for row in results:
-                document, quota = row
-                quota = int(quota)
-
-                if int(document) not in existing_documents:
-                    line = f'{document}|{quota}\n'
-                    file.write(line)
+            line = f'{document}|{quota}\n'
+            file.write(line)
 
         return True 
+
     except Exception as e:
         error_message = f'Error al generar y guardar el archivo TXT: {str(e)}'
         return {'message': error_message}

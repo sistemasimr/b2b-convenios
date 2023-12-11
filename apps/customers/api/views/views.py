@@ -240,17 +240,17 @@ class CustomersLoad(APIView):
                         else:
                             if row['cupo'] < 0:
                                 Customer.objects.filter(document=row['documento'], is_active=True).update(quota=current_quota - abs(row['cupo']), updated_at=timezone.now())
+                                print("cupos",row['cupo'])
+                                file_comerssia_update_discre(row['cupo'],row['documento'])
                             else:
                                 Customer.objects.filter(document=row['documento'], is_active=True).update(quota=current_quota + row['cupo'], updated_at=timezone.now())
                     else:
                         clients_not_found.append(row['documento'])
 
-
                     customer_inactive = Customer.objects.filter(document=row['documento'], is_active=False).first()
 
                     if customer_inactive is not None:
                         Customer.objects.filter(document=row['documento'], is_active=False).update(is_active=True, updated_at=timezone.now())
-
 
                 list_customer = list_users()
                 success_message = 'Clientes actualizados con éxito'
@@ -263,11 +263,9 @@ class CustomersLoad(APIView):
                     could_not_update_message = f'No se pudo disminuir los cupos a los siguientes documentos debido a que el nuevo cupo no puede ser mayor al actual: {", ".join(map(str, clients_could_not_update))}'
                     success_message += f'. {could_not_update_message}'
 
-
                 data = {'message': success_message, 'data': list_customer}
                 return Response(data, status=200)
             
-
         except Exception as e:
             data = {'message': 'Error al procesar el archivo Excel', 'data': str(e)}
             return Response(data, status=500)
