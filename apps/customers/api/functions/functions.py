@@ -203,28 +203,60 @@ def file_comerssia(existing_customers):
 #         print(error_message)
 #         return False,error_message
     
-def file_comerssia_update_discre(quota,document):
+def file_comerssia_update_discre(lines):
     try:
         fecha = datetime.now().strftime("%Y%m%d")
         folder_name = Path(f'{os.getcwd()}/commons/files/cargas/')
         file_name = f'DISCRE{fecha}.txt'
-        quota = quota * (-1)
 
-        full_path = os.path.join(folder_name, file_name)
-        
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
 
-        with open(full_path, 'w') as file:
-            line = f'{document}|{quota}\n'
-            file.write(line)
+        full_path = os.path.join(folder_name, file_name)
 
-        return True 
+        with open(full_path, 'w') as file:
+            for line in lines:
+                file.write(line)
+
+        return True
 
     except Exception as e:
         error_message = f'Error al generar y guardar el archivo TXT: {str(e)}'
         return {'message': error_message}
     
+# def upload_file_to_ftp_discre():
+#     try:
+#         fecha = datetime.now().strftime("%Y%m%d")
+#         file_name = f'DISCRE{fecha}.txt'
+
+#         file_path = Path(os.path.join(os.getcwd(), f'commons/files/cargas/{file_name}'))
+
+#         ftp_comerssia = conexion_ftp()
+#         ftp_comerssia = conexion_ftp().obtener_ftp_salida()
+#         ftp_comerssia.encoding = 'utf-8'
+#         ftp_comerssia.sendcmd('OPTS UTF8 ON')
+
+#         with open(file_path, 'rb') as file:
+#             ftp_comerssia.storbinary(f"STOR {file_name}", file, 1024)
+
+#         ftp_comerssia.quit()
+
+#         print(f'¡Éxito! Archivo {file_name} cargado correctamente al servidor FTP.')
+#         return True
+
+#     except Exception as e:
+#         traceback.print_exc()
+#         error_message = f'{str(e)}'
+#         print(error_message)
+#         return False,error_message
+
+    
+# def validate_quota_comerssia():
+#     cursor_b2b = connections['bigjohndb'].cursor()
+#     query = 'SELECT * FROM vw_customers_customers_agreements'
+#     cursor_b2b.execute(query)
+#     results = cursor_b2b.fetchall()
+
 def list_users():
     customers = Customer.objects.filter(is_active=True).order_by('-id')
     serializer = CustomerSerializer(customers, many=True)

@@ -214,7 +214,8 @@ class CustomersLoad(APIView):
                 clients_not_found = []
                 clients_could_not_update = []
                 clients_with_negative_quota = []
-                
+                all_lines = []
+
                 for index, row in df.iterrows():
 
                     if not validate_customer_quota_negative(row['cupo']):
@@ -236,8 +237,7 @@ class CustomersLoad(APIView):
                         else:
                             if row['cupo'] < 0:
                                 Customer.objects.filter(document=row['documento'], is_active=True).update(quota=current_quota - abs(row['cupo']), updated_at=timezone.now())
-                                print("cupos",row['cupo'])
-                                file_comerssia_update_discre(row['cupo'],row['documento'])
+                                all_lines.append(f'{row["documento"]}|{abs(row["cupo"])}\n')
                             else:
                                 Customer.objects.filter(document=row['documento'], is_active=True).update(quota=current_quota + row['cupo'], updated_at=timezone.now())
                     else:
@@ -246,7 +246,7 @@ class CustomersLoad(APIView):
                     customer_inactive = Customer.objects.filter(document=row['documento'], is_active=False).first()
 
                     if customer_inactive is not None:
-                        new_quota_inactive = Decimal(row['cupo'].item())
+                        new_quota_inactive = Decimal(row['cupo'])
 
                         if new_quota_inactive < 0:
                             clients_with_negative_quota.append(row['documento'])
@@ -270,6 +270,8 @@ class CustomersLoad(APIView):
                         could_not_update_message = f'No se pudo disminuir los cupos a los siguientes documentos debido a que el nuevo cupo no puede ser mayor al actual: {", ".join(map(str, clients_could_not_update))}'
                         success_message += f'. {could_not_update_message}'
 
+                file_comerssia_update_discre(all_lines)
+                # upload_file_to_ftp_discre()
 
                 data = {'message': success_message, 'data': list_customer}
                 return Response(data, status=200)
