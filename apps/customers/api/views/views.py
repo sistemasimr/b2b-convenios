@@ -196,14 +196,9 @@ class CustomersLoad(APIView):
                 df = pd.read_excel(archive)
                 required_columns = ['documento','cupo']
 
-                if not all(col in df.columns for col in required_columns) or len(df.columns) > 2:
-                    if len(df.columns) > 1:
-                        message = 'El archivo Excel tiene más de un encabezado. Debe tener solo dos encabezados llamado "documento" y "cupo".'
-                    else:
-                        missing_columns = [col for col in required_columns if col not in df.columns]
-                        message = f'Falta el encabezado en el archivo Excel: {", ".join(missing_columns)}'
-
-                    data = {'message': message, 'data': None}
+                if not all(col in df.columns for col in required_columns):
+                    missing_columns = [col for col in required_columns if col not in df.columns]
+                    data = {'message': f'Faltan los siguientes encabezados en el archivo Excel: {", ".join(missing_columns)}', 'data': None}
                     return Response(data, status=400)
                 
                 if df.empty:
