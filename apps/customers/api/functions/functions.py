@@ -250,11 +250,32 @@ def file_comerssia_update_discre(lines):
 #         print(error_message)
 #         return False,error_message
 
+def file_comerssia_update_aumcre(lines):
+    try:
+        fecha = datetime.now().strftime("%Y%m%d")
+        folder_name = Path(f'{os.getcwd()}/commons/files/cargas/')
+        file_name = f'AUMCRE{fecha}.txt'
+
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
+
+        full_path = os.path.join(folder_name, file_name)
+
+        with open(full_path, 'w') as file:
+            for line in lines:
+                file.write(line)
+
+        return True
+
+    except Exception as e:
+        error_message = f'Error al generar y guardar el archivo TXT: {str(e)}'
+        return {'message': error_message}
+
+
     
 def validate_quota_comerssia(documents):
     cursor_b2b = connections['bigjohndb'].cursor()
 
-    # Construye la lista de documentos como una cadena separada por comas
     document_str = ', '.join(str(doc) for doc in documents)
 
     query = f"""SELECT

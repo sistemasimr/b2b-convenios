@@ -216,6 +216,7 @@ class CustomersLoad(APIView):
                 clients_with_negative_quota = []
                 clients_quota = []
                 all_lines = []
+                all_lines_positives = []
 
                 for index, row in df.iterrows():
 
@@ -236,9 +237,9 @@ class CustomersLoad(APIView):
                         if new_quota < 0 and abs(new_quota) > current_quota:
                             clients_could_not_update.append(row['documento'])
                         else:
-                            quota_comerssia_results = validate_quota_comerssia([row['documento']])
-
                             if row['cupo'] < 0:
+                                quota_comerssia_results = validate_quota_comerssia([row['documento']])
+
                                 if quota_comerssia_results:
                                     cfnvalor2 = quota_comerssia_results[0][1]
                                     if row['cupo'] < cfnvalor2:
@@ -246,8 +247,12 @@ class CustomersLoad(APIView):
                                     else:
                                         Customer.objects.filter(document=row['documento'], is_active=True).update(quota=current_quota - abs(row['cupo']), updated_at=timezone.now())
                                         all_lines.append(f'{row["documento"]}|{abs(row["cupo"])}\n')
+                                else:
+                                        Customer.objects.filter(document=row['documento'], is_active=True).update(quota=current_quota - abs(row['cupo']), updated_at=timezone.now())
+                                        all_lines.append(f'{row["documento"]}|{abs(row["cupo"])}\n')
                             else:
                                 Customer.objects.filter(document=row['documento'], is_active=True).update(quota=current_quota + row['cupo'], updated_at=timezone.now())
+                                all_lines_positives.append(f'{row["documento"]}|{abs(row["cupo"])}\n')
                     else:
                         clients_not_found.append(row['documento'])
 
@@ -282,9 +287,9 @@ class CustomersLoad(APIView):
                         could_not_update_message = f'No se pudo disminuir los cupos a los siguientes documentos debido a que el nuevo cupo no puede ser mayor al actual: {", ".join(map(str, clients_could_not_update))}'
                         success_message += f'. {could_not_update_message}'
 
-                    
 
                 file_comerssia_update_discre(all_lines)
+                file_comerssia_update_aumcre(all_lines_positives)
                 # upload_file_to_ftp_discre()
 
                 data = {'message': success_message, 'data': list_customer}
