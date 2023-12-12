@@ -251,11 +251,30 @@ def file_comerssia_update_discre(lines):
 #         return False,error_message
 
     
-# def validate_quota_comerssia():
-#     cursor_b2b = connections['bigjohndb'].cursor()
-#     query = 'SELECT * FROM vw_customers_customers_agreements'
-#     cursor_b2b.execute(query)
-#     results = cursor_b2b.fetchall()
+def validate_quota_comerssia(documents):
+    cursor_b2b = connections['bigjohndb'].cursor()
+
+    # Construye la lista de documentos como una cadena separada por comas
+    document_str = ', '.join(str(doc) for doc in documents)
+
+    query = f"""SELECT
+                    clicodigo,
+                    cfnvalor2 
+                FROM
+                    BIGJOHN.dbo.CodigosFinancieros 
+                WHERE
+                    TCFcodigo = 06 
+                    AND cfnvalor3 <> 0 
+                    AND cfnvalor2 <> 0
+                    AND clicodigo in ({document_str})
+            """
+    print(query)
+    
+    cursor_b2b.execute(query)
+    results = cursor_b2b.fetchall()
+    
+    return results
+
 
 def list_users():
     customers = Customer.objects.filter(is_active=True).order_by('-id')

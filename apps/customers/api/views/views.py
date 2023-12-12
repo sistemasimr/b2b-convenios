@@ -214,6 +214,7 @@ class CustomersLoad(APIView):
                 clients_not_found = []
                 clients_could_not_update = []
                 clients_with_negative_quota = []
+                clients_quota = []
                 all_lines = []
 
                 for index, row in df.iterrows():
@@ -235,9 +236,16 @@ class CustomersLoad(APIView):
                         if new_quota < 0 and abs(new_quota) > current_quota:
                             clients_could_not_update.append(row['documento'])
                         else:
+                            quota_comerssia_results = validate_quota_comerssia([row['documento']])
+
                             if row['cupo'] < 0:
-                                Customer.objects.filter(document=row['documento'], is_active=True).update(quota=current_quota - abs(row['cupo']), updated_at=timezone.now())
-                                all_lines.append(f'{row["documento"]}|{abs(row["cupo"])}\n')
+                                if quota_comerssia_results:
+                                    cfnvalor2 = quota_comerssia_results[0][1]
+                                    if row['cupo'] < cfnvalor2:
+                                        clients_quota.append((row['documento'], cfnvalor2))
+                                    else:
+                                        Customer.objects.filter(document=row['documento'], is_active=True).update(quota=current_quota - abs(row['cupo']), updated_at=timezone.now())
+                                        all_lines.append(f'{row["documento"]}|{abs(row["cupo"])}\n')
                             else:
                                 Customer.objects.filter(document=row['documento'], is_active=True).update(quota=current_quota + row['cupo'], updated_at=timezone.now())
                     else:
@@ -261,14 +269,20 @@ class CustomersLoad(APIView):
                     not_found_message = f'No se encontraron clientes con los siguientes documentos: {", ".join(map(str, clients_not_found))}'
                     success_message += f', excepto los siguientes: {not_found_message}'
 
+                if clients_quota:
+                    clients_not_quota = 'No se pudieron actualizar los siguientes documentos porque el nuevo cupo es menor que el saldo disponible: {}.'.format(", ".join("({}, {})".format(x[0], format(x[1], '.2f')) for x in clients_quota))
+                    success_message += f'. {clients_not_quota}'
+
+
                 if clients_with_negative_quota:
                     negative_quota_message = f'Los siguientes documentos tienen un nuevo cupo negativo y no se actualizaron: {", ".join(map(str, clients_with_negative_quota))}'
                     success_message += f'. {negative_quota_message}'
-
                 else:
                     if clients_could_not_update:
                         could_not_update_message = f'No se pudo disminuir los cupos a los siguientes documentos debido a que el nuevo cupo no puede ser mayor al actual: {", ".join(map(str, clients_could_not_update))}'
                         success_message += f'. {could_not_update_message}'
+
+                    
 
                 file_comerssia_update_discre(all_lines)
                 # upload_file_to_ftp_discre()
