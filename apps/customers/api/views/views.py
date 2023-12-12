@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from ...models import * 
 from ..functions.functions import *
-from django.db.models import F 
+from decimal import Decimal
 
 
 
@@ -218,6 +218,7 @@ class CustomersLoad(APIView):
                 
                 clients_not_found = []
                 clients_could_not_update = []
+                clients_with_negative_quota = []
                 
                 for index, row in df.iterrows():
 
@@ -250,7 +251,13 @@ class CustomersLoad(APIView):
                     customer_inactive = Customer.objects.filter(document=row['documento'], is_active=False).first()
 
                     if customer_inactive is not None:
-                        Customer.objects.filter(document=row['documento'], is_active=False).update(is_active=True, updated_at=timezone.now())
+                        new_quota_inactive = Decimal(row['cupo'].item())
+
+                        if new_quota_inactive < 0:
+                            clients_with_negative_quota.append(row['documento'])
+
+                        elif new_quota_inactive >= 0:
+                            Customer.objects.filter(document=row['documento'], is_active=False).update(is_active=True, quota=new_quota_inactive, updated_at=timezone.now())
 
                 list_customer = list_users()
                 success_message = 'Clientes actualizados con éxito'
@@ -259,9 +266,15 @@ class CustomersLoad(APIView):
                     not_found_message = f'No se encontraron clientes con los siguientes documentos: {", ".join(map(str, clients_not_found))}'
                     success_message += f', excepto los siguientes: {not_found_message}'
 
-                if clients_could_not_update:
-                    could_not_update_message = f'No se pudo disminuir los cupos a los siguientes documentos debido a que el nuevo cupo no puede ser mayor al actual: {", ".join(map(str, clients_could_not_update))}'
-                    success_message += f'. {could_not_update_message}'
+                if clients_with_negative_quota:
+                    negative_quota_message = f'Los siguientes documentos tienen un nuevo cupo negativo y no se actualizaron: {", ".join(map(str, clients_with_negative_quota))}'
+                    success_message += f'. {negative_quota_message}'
+
+                else:
+                    if clients_could_not_update:
+                        could_not_update_message = f'No se pudo disminuir los cupos a los siguientes documentos debido a que el nuevo cupo no puede ser mayor al actual: {", ".join(map(str, clients_could_not_update))}'
+                        success_message += f'. {could_not_update_message}'
+
 
                 data = {'message': success_message, 'data': list_customer}
                 return Response(data, status=200)
