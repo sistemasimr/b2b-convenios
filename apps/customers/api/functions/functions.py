@@ -144,39 +144,42 @@ def send_delete_customer_email(email,documents):
     email.content_subtype = "html"
     email.send()
 
-def file_comerssia(existing_customers):
+def send_activate_customer_email(email,documents):
+    documents_formatted = ", ".join(str(doc) for doc in documents)
+
+    menssage = f"Estos son los clientes que han sido activados: <br> <br> {documents_formatted} <br> <br> \n"
+    email = EmailMessage(
+        subject="Clientes activados de venta credito en b2b",
+        body=menssage,
+        from_email="Clientes activados de venta credito en b2b <bigjohnsistemas@gmail.com>",
+        to=[email],
+        headers={"X-MJ-TemplateLanguage": 1},
+    )
+    email.content_subtype = "html"
+    email.send()
+
+def file_comerssia(lines):
     try:
         fecha = datetime.now().strftime("%Y%m%d")
         folder_name = Path(f'{os.getcwd()}/commons/files/cargas/')
         file_name = f'CRECRE{fecha}.txt'
 
-        full_path = os.path.join(folder_name, file_name)
-        
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
 
-        cursor_b2b = connections['default'].cursor()
-        query = 'SELECT * FROM vw_customers_customers_agreements'
-        cursor_b2b.execute(query)
-        results = cursor_b2b.fetchall()
-
-        existing_documents = set(existing_customers.keys())
+        full_path = os.path.join(folder_name, file_name)
 
         with open(full_path, 'w') as file:
-            for row in results:
-                document, quota = row
-                quota = int(quota)
+            for line in lines:
+                file.write(line)
 
-                if int(document) not in existing_documents:
-                    line = f'{document}|{quota}\n'
-                    file.write(line)
-
-        return True 
+        return True
+    
     except Exception as e:
         error_message = f'Error al generar y guardar el archivo TXT: {str(e)}'
         return {'message': error_message}
-    
- 
+
+
 # def upload_file_to_ftp():
 #     try:
 #         fecha = datetime.now().strftime("%Y%m%d")
@@ -271,6 +274,32 @@ def file_comerssia_update_aumcre(lines):
         error_message = f'Error al generar y guardar el archivo TXT: {str(e)}'
         return {'message': error_message}
 
+
+# def upload_file_to_ftp_aumcre():
+#     try:
+#         fecha = datetime.now().strftime("%Y%m%d")
+#         file_name = f'AUMCRE{fecha}.txt'
+
+#         file_path = Path(os.path.join(os.getcwd(), f'commons/files/cargas/{file_name}'))
+
+#         ftp_comerssia = conexion_ftp()
+#         ftp_comerssia = conexion_ftp().obtener_ftp_salida()
+#         ftp_comerssia.encoding = 'utf-8'
+#         ftp_comerssia.sendcmd('OPTS UTF8 ON')
+
+#         with open(file_path, 'rb') as file:
+#             ftp_comerssia.storbinary(f"STOR {file_name}", file, 1024)
+
+#         ftp_comerssia.quit()
+
+#         print(f'¡Éxito! Archivo {file_name} cargado correctamente al servidor FTP.')
+#         return True
+
+#     except Exception as e:
+#         traceback.print_exc()
+#         error_message = f'{str(e)}'
+#         print(error_message)
+#         return False,error_message
 
     
 def validate_quota_comerssia(documents):

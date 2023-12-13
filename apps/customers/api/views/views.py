@@ -52,6 +52,7 @@ class CustomersLoad(APIView):
                 id_agreement = 1
                 customers_to_create = []
                 existing_customers = {} 
+                all_lines = []
 
                 for index, row in df.iterrows():
                     document_type_excel = row['tipo_documento']
@@ -125,23 +126,20 @@ class CustomersLoad(APIView):
                     )
 
                     customers_to_create.append(customer)
+                    all_lines.append(f'{document_number}|{abs(row["cupo"])}\n')
+
                 try:
                     Customer.objects.bulk_create(customers_to_create)
                     
                     created_customers = Customer.objects.filter(document__in=[customer.document for customer in customers_to_create])
                     agreement = Agreement.objects.get(id=id_agreement)
                     agreement.customers.add(*created_customers)
-                    
+   
                 except Exception as e:
                    return Response({"message": str(e)}, status=500)
                     
                 list_customer= list_users()
-
-                try:
-                   file_comerssiaa = file_comerssia(existing_customers)
-                except Exception as e:
-                   return Response({"error_message": str(e)}, status=500)
-                
+                file_comerssiaa = file_comerssia(all_lines)
                 # upload_file_to_ftp() descomentar esto cuando se vaya a desplegar a pro
                 
                 if existing_customers:
@@ -195,6 +193,7 @@ class CustomersLoad(APIView):
 
                 df = pd.read_excel(archive)
                 required_columns = ['documento','cupo']
+                email = 'mjaramillo@imr.com.co' #cambiar correo cuando se despliege a producción
 
                 if not all(col in df.columns for col in required_columns):
                     missing_columns = [col for col in required_columns if col not in df.columns]
@@ -215,7 +214,9 @@ class CustomersLoad(APIView):
                 clients_could_not_update = []
                 clients_with_negative_quota = []
                 clients_quota = []
+                documents_to_activate = []
                 all_lines = []
+                all_lines_update_quota = []
                 all_lines_positives = []
 
                 for index, row in df.iterrows():
@@ -265,7 +266,18 @@ class CustomersLoad(APIView):
                             clients_with_negative_quota.append(row['documento'])
 
                         elif new_quota_inactive >= 0:
-                            Customer.objects.filter(document=row['documento'], is_active=False).update(is_active=True, quota=new_quota_inactive, updated_at=timezone.now())
+                            quota_from_db = customer_inactive.quota
+
+                            if new_quota_inactive == int(quota_from_db):
+                                Customer.objects.filter(document=row['documento'], is_active=False).update(is_active=True, updated_at=timezone.now())
+                                documents_to_activate.append(row['documento'])
+                            else: 
+                                Customer.objects.filter(document=row['documento'], is_active=False).update(is_active=True, quota=new_quota_inactive, updated_at=timezone.now())
+                                all_lines_update_quota.append(f'{(row["documento"])}|{abs(new_quota_inactive)}\n')
+
+
+                if documents_to_activate:
+                    send_activate_customer_email(email, documents_to_activate)
 
                 list_customer = list_users()
                 success_message = 'Clientes actualizados con éxito'
@@ -278,7 +290,6 @@ class CustomersLoad(APIView):
                     clients_not_quota = 'No se pudieron actualizar los siguientes documentos porque el nuevo cupo es menor que el saldo disponible: {}.'.format(", ".join("({}, {})".format(x[0], format(x[1], '.2f')) for x in clients_quota))
                     success_message += f'. {clients_not_quota}'
 
-
                 if clients_with_negative_quota:
                     negative_quota_message = f'Los siguientes documentos tienen un nuevo cupo negativo y no se actualizaron: {", ".join(map(str, clients_with_negative_quota))}'
                     success_message += f'. {negative_quota_message}'
@@ -287,10 +298,12 @@ class CustomersLoad(APIView):
                         could_not_update_message = f'No se pudo disminuir los cupos a los siguientes documentos debido a que el nuevo cupo no puede ser mayor al actual: {", ".join(map(str, clients_could_not_update))}'
                         success_message += f'. {could_not_update_message}'
 
-
                 file_comerssia_update_discre(all_lines)
                 file_comerssia_update_aumcre(all_lines_positives)
-                # upload_file_to_ftp_discre()
+                file_comerssia(all_lines_update_quota)
+                # upload_file_to_ftp_discre()descomentar cuando se pase a pro
+                # upload_file_to_ftp_aumcre()descomentar cuando se pase a pro
+                # upload_file_to_ftp() descomentar esto cuando se vaya a desplegar a pro
 
                 data = {'message': success_message, 'data': list_customer}
                 return Response(data, status=200)
