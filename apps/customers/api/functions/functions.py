@@ -318,7 +318,6 @@ def validate_quota_comerssia(documents):
                     AND cfnvalor2 <> 0
                     AND clicodigo in ({document_str})
             """
-    print(query)
     
     cursor_b2b.execute(query)
     results = cursor_b2b.fetchall()

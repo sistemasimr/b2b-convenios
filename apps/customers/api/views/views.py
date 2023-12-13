@@ -229,7 +229,9 @@ class CustomersLoad(APIView):
                         data = {'message': f'El campo cupo para el documento {row["documento"]} debe ser igual o menor a $1.000.000.', 'data': None}
                         return Response(data, status=400)
                     
-                    customer = Customer.objects.filter(document=row['documento']).first()
+                    customer = Customer.objects.filter(document=row['documento'], is_active=True).first()
+                    customer_all = Customer.objects.filter(document=row['documento']).first()
+
 
                     if customer is not None:
                         current_quota = customer.quota
@@ -254,7 +256,7 @@ class CustomersLoad(APIView):
                             else:
                                 Customer.objects.filter(document=row['documento'], is_active=True).update(quota=current_quota + row['cupo'], updated_at=timezone.now())
                                 all_lines_positives.append(f'{row["documento"]}|{abs(row["cupo"])}\n')
-                    else:
+                    if customer_all is None:
                         clients_not_found.append(row['documento'])
 
                     customer_inactive = Customer.objects.filter(document=row['documento'], is_active=False).first()
@@ -274,7 +276,6 @@ class CustomersLoad(APIView):
                             else: 
                                 Customer.objects.filter(document=row['documento'], is_active=False).update(is_active=True, quota=new_quota_inactive, updated_at=timezone.now())
                                 all_lines_update_quota.append(f'{(row["documento"])}|{abs(new_quota_inactive)}\n')
-
 
                 if documents_to_activate:
                     send_activate_customer_email(email, documents_to_activate)
@@ -298,12 +299,22 @@ class CustomersLoad(APIView):
                         could_not_update_message = f'No se pudo disminuir los cupos a los siguientes documentos debido a que el nuevo cupo no puede ser mayor al actual: {", ".join(map(str, clients_could_not_update))}'
                         success_message += f'. {could_not_update_message}'
 
-                file_comerssia_update_discre(all_lines)
-                file_comerssia_update_aumcre(all_lines_positives)
-                file_comerssia(all_lines_update_quota)
-                # upload_file_to_ftp_discre()descomentar cuando se pase a pro
-                # upload_file_to_ftp_aumcre()descomentar cuando se pase a pro
-                # upload_file_to_ftp() descomentar esto cuando se vaya a desplegar a pro
+                print("all_lines----",all_lines)
+
+                if all_lines:
+                    print("entra",all_lines)
+                    file_comerssia_update_discre(all_lines)
+                    # upload_file_to_ftp_discre()descomentar cuando se pase a pro
+
+                if all_lines_positives:
+                    print("entra",all_lines_positives)
+                    file_comerssia_update_aumcre(all_lines_positives)
+                    # upload_file_to_ftp_aumcre()descomentar cuando se pase a pro
+
+                if all_lines_update_quota:
+                    print("entra", all_lines_update_quota)
+                    file_comerssia(all_lines_update_quota)
+                    # upload_file_to_ftp() descomentar esto cuando se vaya a desplegar a pro
 
                 data = {'message': success_message, 'data': list_customer}
                 return Response(data, status=200)
