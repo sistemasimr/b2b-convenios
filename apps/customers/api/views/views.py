@@ -140,7 +140,8 @@ class CustomersLoad(APIView):
                     
                 list_customer= list_users()
                 file_comerssiaa = file_comerssia(all_lines)
-                # upload_file_to_ftp() descomentar esto cuando se vaya a desplegar a pro
+                # upload_file_to_ftp() 
+                # descomentar esto cuando se vaya a desplegar a pro
                 
                 if existing_customers:
                     existing_customers_message = '\n {}'.format(',\n'.join(map(str, existing_customers)))
@@ -232,7 +233,6 @@ class CustomersLoad(APIView):
                     customer = Customer.objects.filter(document=row['documento'], is_active=True).first()
                     customer_all = Customer.objects.filter(document=row['documento']).first()
 
-
                     if customer is not None:
                         current_quota = customer.quota
                         new_quota = row['cupo']
@@ -276,6 +276,7 @@ class CustomersLoad(APIView):
                             else: 
                                 Customer.objects.filter(document=row['documento'], is_active=False).update(is_active=True, quota=new_quota_inactive, updated_at=timezone.now())
                                 all_lines_update_quota.append(f'{(row["documento"])}|{abs(new_quota_inactive)}\n')
+                                documents_to_activate.append(row['documento'])
 
                 if documents_to_activate:
                     send_activate_customer_email(email, documents_to_activate)
@@ -299,22 +300,20 @@ class CustomersLoad(APIView):
                         could_not_update_message = f'No se pudo disminuir los cupos a los siguientes documentos debido a que el nuevo cupo no puede ser mayor al actual: {", ".join(map(str, clients_could_not_update))}'
                         success_message += f'. {could_not_update_message}'
 
-                print("all_lines----",all_lines)
-
                 if all_lines:
-                    print("entra",all_lines)
                     file_comerssia_update_discre(all_lines)
-                    # upload_file_to_ftp_discre()descomentar cuando se pase a pro
+                    # upload_file_to_ftp_discre()
+                    # descomentar cuando se pase a pro
 
                 if all_lines_positives:
-                    print("entra",all_lines_positives)
                     file_comerssia_update_aumcre(all_lines_positives)
-                    # upload_file_to_ftp_aumcre()descomentar cuando se pase a pro
+                    # upload_file_to_ftp_aumcre()
+                    # descomentar cuando se pase a pro
 
                 if all_lines_update_quota:
-                    print("entra", all_lines_update_quota)
                     file_comerssia(all_lines_update_quota)
-                    # upload_file_to_ftp() descomentar esto cuando se vaya a desplegar a pro
+                    # upload_file_to_ftp() 
+                    # descomentar esto cuando se vaya a desplegar a pro
 
                 data = {'message': success_message, 'data': list_customer}
                 return Response(data, status=200)

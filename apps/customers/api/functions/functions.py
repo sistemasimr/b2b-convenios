@@ -180,31 +180,31 @@ def file_comerssia(lines):
         return {'message': error_message}
 
 
-# def upload_file_to_ftp():
-#     try:
-#         fecha = datetime.now().strftime("%Y%m%d")
-#         file_name = f'CRECRE{fecha}.txt'
+def upload_file_to_ftp():
+    try:
+        fecha = datetime.now().strftime("%Y%m%d")
+        file_name = f'CRECRE{fecha}.txt'
 
-#         file_path = Path(os.path.join(os.getcwd(), f'commons/files/cargas/{file_name}'))
+        file_path = Path(os.path.join(os.getcwd(), f'commons/files/cargas/{file_name}'))
 
-#         ftp_comerssia = conexion_ftp()
-#         ftp_comerssia = conexion_ftp().obtener_ftp_salida()
-#         ftp_comerssia.encoding = 'utf-8'
-#         ftp_comerssia.sendcmd('OPTS UTF8 ON')
+        ftp_comerssia = conexion_ftp()
+        ftp_comerssia = conexion_ftp().obtener_ftp_salida()
+        ftp_comerssia.encoding = 'utf-8'
+        ftp_comerssia.sendcmd('OPTS UTF8 ON')
 
-#         with open(file_path, 'rb') as file:
-#             ftp_comerssia.storbinary(f"STOR {file_name}", file, 1024)
+        with open(file_path, 'rb') as file:
+            ftp_comerssia.storbinary(f"STOR {file_name}", file, 1024)
 
-#         ftp_comerssia.quit()
+        ftp_comerssia.quit()
 
-#         print(f'¡Éxito! Archivo {file_name} cargado correctamente al servidor FTP.')
-#         return True
+        print(f'¡Éxito! Archivo {file_name} cargado correctamente al servidor FTP.')
+        return True
 
-#     except Exception as e:
-#         traceback.print_exc()
-#         error_message = f'{str(e)}'
-#         print(error_message)
-#         return False,error_message
+    except Exception as e:
+        traceback.print_exc()
+        error_message = f'{str(e)}'
+        print(error_message)
+        return False,error_message
     
 def file_comerssia_update_discre(lines):
     try:
@@ -227,31 +227,31 @@ def file_comerssia_update_discre(lines):
         error_message = f'Error al generar y guardar el archivo TXT: {str(e)}'
         return {'message': error_message}
     
-# def upload_file_to_ftp_discre():
-#     try:
-#         fecha = datetime.now().strftime("%Y%m%d")
-#         file_name = f'DISCRE{fecha}.txt'
+def upload_file_to_ftp_discre():
+    try:
+        fecha = datetime.now().strftime("%Y%m%d")
+        file_name = f'DISCRE{fecha}.txt'
 
-#         file_path = Path(os.path.join(os.getcwd(), f'commons/files/cargas/{file_name}'))
+        file_path = Path(os.path.join(os.getcwd(), f'commons/files/cargas/{file_name}'))
 
-#         ftp_comerssia = conexion_ftp()
-#         ftp_comerssia = conexion_ftp().obtener_ftp_salida()
-#         ftp_comerssia.encoding = 'utf-8'
-#         ftp_comerssia.sendcmd('OPTS UTF8 ON')
+        ftp_comerssia = conexion_ftp()
+        ftp_comerssia = conexion_ftp().obtener_ftp_salida()
+        ftp_comerssia.encoding = 'utf-8'
+        ftp_comerssia.sendcmd('OPTS UTF8 ON')
 
-#         with open(file_path, 'rb') as file:
-#             ftp_comerssia.storbinary(f"STOR {file_name}", file, 1024)
+        with open(file_path, 'rb') as file:
+            ftp_comerssia.storbinary(f"STOR {file_name}", file, 1024)
 
-#         ftp_comerssia.quit()
+        ftp_comerssia.quit()
 
-#         print(f'¡Éxito! Archivo {file_name} cargado correctamente al servidor FTP.')
-#         return True
+        print(f'¡Éxito! Archivo {file_name} cargado correctamente al servidor FTP.')
+        return True
 
-#     except Exception as e:
-#         traceback.print_exc()
-#         error_message = f'{str(e)}'
-#         print(error_message)
-#         return False,error_message
+    except Exception as e:
+        traceback.print_exc()
+        error_message = f'{str(e)}'
+        print(error_message)
+        return False,error_message
 
 def file_comerssia_update_aumcre(lines):
     try:
@@ -275,31 +275,31 @@ def file_comerssia_update_aumcre(lines):
         return {'message': error_message}
 
 
-# def upload_file_to_ftp_aumcre():
-#     try:
-#         fecha = datetime.now().strftime("%Y%m%d")
-#         file_name = f'AUMCRE{fecha}.txt'
+def upload_file_to_ftp_aumcre():
+    try:
+        fecha = datetime.now().strftime("%Y%m%d")
+        file_name = f'AUMCRE{fecha}.txt'
 
-#         file_path = Path(os.path.join(os.getcwd(), f'commons/files/cargas/{file_name}'))
+        file_path = Path(os.path.join(os.getcwd(), f'commons/files/cargas/{file_name}'))
 
-#         ftp_comerssia = conexion_ftp()
-#         ftp_comerssia = conexion_ftp().obtener_ftp_salida()
-#         ftp_comerssia.encoding = 'utf-8'
-#         ftp_comerssia.sendcmd('OPTS UTF8 ON')
+        ftp_comerssia = conexion_ftp()
+        ftp_comerssia = conexion_ftp().obtener_ftp_salida()
+        ftp_comerssia.encoding = 'utf-8'
+        ftp_comerssia.sendcmd('OPTS UTF8 ON')
 
-#         with open(file_path, 'rb') as file:
-#             ftp_comerssia.storbinary(f"STOR {file_name}", file, 1024)
+        with open(file_path, 'rb') as file:
+            ftp_comerssia.storbinary(f"STOR {file_name}", file, 1024)
 
-#         ftp_comerssia.quit()
+        ftp_comerssia.quit()
 
-#         print(f'¡Éxito! Archivo {file_name} cargado correctamente al servidor FTP.')
-#         return True
+        print(f'¡Éxito! Archivo {file_name} cargado correctamente al servidor FTP.')
+        return True
 
-#     except Exception as e:
-#         traceback.print_exc()
-#         error_message = f'{str(e)}'
-#         print(error_message)
-#         return False,error_message
+    except Exception as e:
+        traceback.print_exc()
+        error_message = f'{str(e)}'
+        print(error_message)
+        return False,error_message
 
     
 def validate_quota_comerssia(documents):
