@@ -140,8 +140,7 @@ class CustomersLoad(APIView):
                     
                 list_customer= list_users()
                 file_comerssiaa = file_comerssia(all_lines)
-                # upload_file_to_ftp() 
-                # descomentar esto cuando se vaya a desplegar a pro
+                upload_file_to_ftp() 
                 
                 if existing_customers:
                     existing_customers_message = '\n {}'.format(',\n'.join(map(str, existing_customers)))
@@ -156,7 +155,6 @@ class CustomersLoad(APIView):
                 df = pd.read_excel(archive)
                 required_columns = ['documento']
                 list_documents = df['documento'].tolist()
-                email = 'mjaramillo@imr.com.co' #cambiar correo cuando se despliege a producción
 
                 if not all(col in df.columns for col in required_columns) or len(df.columns) > 1:
                     if len(df.columns) > 1:
@@ -185,7 +183,7 @@ class CustomersLoad(APIView):
                     return Response(data, status=500)
     
                 list_customer = list_users()
-                send_delete_customer_email(email,list_documents)
+                send_delete_customer_email(['mjaramillo@imr.com.co', 'micheljararami@gmail.com'],list_documents)
 
                 data = {'message': 'Clientes eliminados con éxito', 'data': list_customer}
                 return Response(data, status=200)
@@ -194,7 +192,6 @@ class CustomersLoad(APIView):
 
                 df = pd.read_excel(archive)
                 required_columns = ['documento','cupo']
-                email = 'mjaramillo@imr.com.co' #cambiar correo cuando se despliege a producción
 
                 if not all(col in df.columns for col in required_columns):
                     missing_columns = [col for col in required_columns if col not in df.columns]
@@ -279,7 +276,7 @@ class CustomersLoad(APIView):
                                 documents_to_activate.append(row['documento'])
 
                 if documents_to_activate:
-                    send_activate_customer_email(email, documents_to_activate)
+                    send_activate_customer_email(['mjaramillo@imr.com.co', 'micheljararami@gmail.com'], documents_to_activate)
 
                 list_customer = list_users()
                 success_message = 'Clientes actualizados con éxito'
@@ -302,18 +299,15 @@ class CustomersLoad(APIView):
 
                 if all_lines:
                     file_comerssia_update_discre(all_lines)
-                    # upload_file_to_ftp_discre()
-                    # descomentar cuando se pase a pro
+                    upload_file_to_ftp_discre()
 
                 if all_lines_positives:
                     file_comerssia_update_aumcre(all_lines_positives)
-                    # upload_file_to_ftp_aumcre()
-                    # descomentar cuando se pase a pro
+                    upload_file_to_ftp_aumcre()
 
                 if all_lines_update_quota:
                     file_comerssia(all_lines_update_quota)
-                    # upload_file_to_ftp() 
-                    # descomentar esto cuando se vaya a desplegar a pro
+                    upload_file_to_ftp() 
 
                 data = {'message': success_message, 'data': list_customer}
                 return Response(data, status=200)
