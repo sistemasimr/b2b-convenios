@@ -152,7 +152,7 @@ def send_activate_customer_email(email,documents):
         subject="Clientes activados de venta credito en b2b",
         body=menssage,
         from_email="Clientes activados de venta credito en b2b <bigjohnsistemas@gmail.com>",
-        to=[email],
+        to=email,
         headers={"X-MJ-TemplateLanguage": 1},
     )
     email.content_subtype = "html"
