@@ -183,7 +183,7 @@ class CustomersLoad(APIView):
                     return Response(data, status=500)
     
                 list_customer = list_users()
-                send_delete_customer_email(['mjaramillo@imr.com.co', 'micheljararami@gmail.com'],list_documents)
+                send_delete_customer_email(['cnorena@imr.com.co', 'lnarvaez@imr.com.co'],list_documents)
 
                 data = {'message': 'Clientes eliminados con éxito', 'data': list_customer}
                 return Response(data, status=200)
@@ -276,7 +276,7 @@ class CustomersLoad(APIView):
                                 documents_to_activate.append(row['documento'])
 
                 if documents_to_activate:
-                    send_activate_customer_email(['mjaramillo@imr.com.co', 'micheljararami@gmail.com'], documents_to_activate)
+                    send_activate_customer_email(['cnorena@imr.com.co', 'lnarvaez@imr.com.co'], documents_to_activate)
 
                 list_customer = list_users()
                 success_message = 'Clientes actualizados con éxito'
