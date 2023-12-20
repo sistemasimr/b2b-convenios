@@ -326,30 +326,21 @@ def validate_quota_comerssia(documents):
 
 
 def list_users():
-    # Obtener la información de saldos disponibles y usados
     balances = get_available_balance()
 
-    # Obtener la lista de clientes activos
     customers = Customer.objects.filter(is_active=True).order_by('-id')
 
-    # Crear una lista para almacenar los resultados serializados
     serialized_customers = []
 
-    # Serializar cada cliente y agregar la información de saldos si está disponible
     for customer in customers:
         customer_data = CustomerSerializer(customer).data
         document = customer_data['document']
 
-        # Agregar los saldos disponibles y usados al resultado serializado
         if document in balances:
             customer_data['saldo_disponible'] = balances[document]['saldo_disponible']
             customer_data['saldo_usado'] = balances[document]['saldo_usado']
-            
-            # Impresiones para depuración
-            print(f"Documento: {document}, Saldo Disponible (BD): {balances[document]['saldo_disponible']}, Saldo Usado (BD): {balances[document]['saldo_usado']}")
-            print(f"Saldo Disponible (Serializado): {customer_data['saldo_disponible']}, Saldo Usado (Serializado): {customer_data['saldo_usado']}")
+
         else:
-            # Impresiones para depuración
             print(f"Documento no encontrado en saldos: {document}")
 
         serialized_customers.append(customer_data)
