@@ -328,7 +328,7 @@ def validate_quota_comerssia(documents):
 def list_users():
     balances = get_available_balance()
 
-    customers = Customer.objects.filter(is_active=True).order_by('-id')
+    customers = Customer.objects.filter(is_active=True).order_by('-updated_at')
 
     serialized_customers = []
 
@@ -337,8 +337,8 @@ def list_users():
         document = customer_data['document']
 
         if document in balances:
-            customer_data['saldo_disponible'] = balances[document]['saldo_disponible']
-            customer_data['saldo_usado'] = balances[document]['saldo_usado']
+            customer_data['available_balance'] = balances[document]['available_balance']
+            customer_data['used_balance'] = balances[document]['used_balance']
 
         else:
             print(f"Documento no encontrado en saldos: {document}")
